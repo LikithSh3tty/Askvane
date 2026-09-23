@@ -40,6 +40,268 @@ extraction:
     extractions:
       - { requirement: dedupe.enabled, value: "true", span: "Yes" }
 
+  # ------------------------------------------------ eval conversations
+  "When a new message lands in my Outlook Invoices folder, email ap@acme.com":
+    extractions:
+      - { requirement: trigger, value: outlook_trigger, span: Outlook }
+      - { requirement: trigger.monitor_location, value: Invoices, span: Invoices folder }
+      - { requirement: action, value: email_send, span: email }
+      - { requirement: action.recipient, value: ap@acme.com, span: ap@acme.com }
+  "Every one of them":
+    extractions:
+      - { requirement: filter.mode, value: all, span: Every }
+  "No":
+    extractions:
+      - { requirement: dedupe.enabled, value: "false", span: "No" }
+  "When our webhook at /orders receives a call, forward it with a POST request to https://erp.example.com/api":
+    extractions:
+      - { requirement: trigger, value: webhook_trigger, span: webhook }
+      - { requirement: trigger.path, value: /orders, span: /orders }
+      - { requirement: action, value: http_request, span: POST request }
+      - { requirement: action.url, value: "https://erp.example.com/api", span: "https://erp.example.com/api" }
+      - { requirement: action.method, value: POST, span: POST }
+  "all of them":
+    extractions:
+      - { requirement: filter.mode, value: all, span: all }
+  "all":
+    extractions:
+      - { requirement: filter.mode, value: all, span: all }
+  "Every day at 9am, post a summary to Slack in #daily":
+    extractions:
+      - { requirement: trigger, value: schedule_trigger, span: Every day }
+      - { requirement: trigger.frequency, value: daily, span: Every day }
+      - { requirement: trigger.time, value: 9am, span: 9am }
+      - { requirement: action, value: slack_notify, span: Slack }
+      - { requirement: action.channel, value: "#daily", span: "#daily" }
+  "every time, no filter":
+    extractions:
+      - { requirement: filter.mode, value: all, span: no filter }
+  "Run weekly and email reports@acme.com":
+    extractions:
+      - { requirement: trigger, value: schedule_trigger, span: weekly }
+      - { requirement: trigger.frequency, value: weekly, span: weekly }
+      - { requirement: action, value: email_send, span: email }
+      - { requirement: action.recipient, value: reports@acme.com, span: reports@acme.com }
+  "09:00":
+    extractions:
+      - { requirement: trigger.time, value: "09:00", span: "09:00" }
+  "Monday":
+    extractions:
+      - { requirement: trigger.day_of_week, value: monday, span: Monday }
+  "every item":
+    extractions:
+      - { requirement: filter.mode, value: all, span: every }
+  "When an invoice arrives in Gmail, alert Slack":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: action, value: slack_notify, span: Slack }
+  "Label Finance, and only above ₹5,000":
+    extractions:
+      - { requirement: trigger.monitor_location, value: Finance, span: Label Finance }
+      - { requirement: filter.mode, value: filtered, span: only above }
+      - { requirement: filter.field, value: amount, span: "₹" }
+      - { requirement: filter.operator, value: gt, span: above }
+      - { requirement: filter.value, value: "5000", span: "₹5,000" }
+  "#ap-alerts":
+    extractions:
+      - { requirement: action.channel, value: "#ap-alerts", span: "#ap-alerts" }
+  "Gmail invoices should go to Slack channel #finance":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: action, value: slack_notify, span: Slack }
+      - { requirement: action.channel, value: "#finance", span: "#finance" }
+  "every invoice":
+    extractions:
+      - { requirement: filter.mode, value: all, span: every }
+  "Watch my Gmail Receipts label":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: trigger.monitor_location, value: Receipts, span: Receipts label }
+  "Only above $200, and ignore duplicates":
+    extractions:
+      - { requirement: filter.mode, value: filtered, span: Only above }
+      - { requirement: filter.field, value: amount, span: "$" }
+      - { requirement: filter.operator, value: gt, span: above }
+      - { requirement: filter.value, value: "200", span: "$200" }
+      - { requirement: dedupe.enabled, value: "true", span: ignore duplicates }
+  "Email me at me@home.org":
+    extractions:
+      - { requirement: action, value: email_send, span: Email me }
+      - { requirement: action.recipient, value: me@home.org, span: me@home.org }
+  "When a Gmail email with label Invoices arrives and the amount is above ₹10,000, post to Slack #finance and ignore duplicates":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: trigger.monitor_location, value: Invoices, span: label Invoices }
+      - { requirement: filter.mode, value: filtered, span: above }
+      - { requirement: filter.field, value: amount, span: amount }
+      - { requirement: filter.operator, value: gt, span: above }
+      - { requirement: filter.value, value: "10000", span: "₹10,000" }
+      - { requirement: action, value: slack_notify, span: Slack }
+      - { requirement: action.channel, value: "#finance", span: "#finance" }
+      - { requirement: dedupe.enabled, value: "true", span: ignore duplicates }
+  "Whenever our /signup webhook fires, email growth@acme.com for every signup, and keep duplicates":
+    extractions:
+      - { requirement: trigger, value: webhook_trigger, span: webhook }
+      - { requirement: trigger.path, value: /signup, span: /signup }
+      - { requirement: action, value: email_send, span: email }
+      - { requirement: action.recipient, value: growth@acme.com, span: growth@acme.com }
+      - { requirement: filter.mode, value: all, span: every }
+      - { requirement: dedupe.enabled, value: "false", span: keep duplicates }
+  "When I get an email with an invoice, post it to Slack":
+    extractions:
+      # "an email" fits both mail triggers; the ambiguity check must ask.
+      - { requirement: trigger, value: gmail_trigger, span: an email }
+      - { requirement: action, value: slack_notify, span: Slack }
+  "Outlook":
+    extractions:
+      - { requirement: trigger, value: outlook_trigger, span: Outlook }
+  "Invoices":
+    extractions:
+      - { requirement: trigger.monitor_location, value: Invoices, span: Invoices }
+  "#billing":
+    extractions:
+      - { requirement: action.channel, value: "#billing", span: "#billing" }
+  "Gmail to Slack please":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: action, value: slack_notify, span: Slack }
+  "The Finance one":
+    extractions:
+      # One word, two open text slots. The question just asked decides.
+      - { requirement: trigger.monitor_location, value: Finance, span: Finance }
+      - { requirement: action.channel, value: Finance, span: Finance }
+  "every one":
+    extractions:
+      - { requirement: filter.mode, value: all, span: every }
+  "Gmail Finance label to Slack #finance":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: trigger.monitor_location, value: Finance, span: Finance label }
+      - { requirement: action, value: slack_notify, span: Slack }
+      - { requirement: action.channel, value: "#finance", span: "#finance" }
+  "every invoice above 500":
+    extractions:
+      # "every" and "above" pull in opposite directions; the agent must ask.
+      - { requirement: filter.mode, value: filtered, span: every invoice above }
+      - { requirement: filter.operator, value: gt, span: above }
+      - { requirement: filter.value, value: "500", span: "500" }
+  "Only the ones above 500":
+    extractions:
+      - { requirement: filter.mode, value: filtered, span: Only }
+      - { requirement: filter.operator, value: gt, span: above }
+      - { requirement: filter.value, value: "500", span: "500" }
+  "amount":
+    extractions:
+      - { requirement: filter.field, value: amount, span: amount }
+  "When a new invoice arrives in Gmail, notify Slack":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: action, value: slack_notify, span: Slack }
+  "Actually, send an email instead":
+    extractions:
+      - { requirement: action, value: email_send, span: an email }
+  "ap@acme.com":
+    extractions:
+      - { requirement: action.recipient, value: ap@acme.com, span: ap@acme.com }
+  "Watch Gmail and message Slack #ops":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: action, value: slack_notify, span: Slack }
+      - { requirement: action.channel, value: "#ops", span: "#ops" }
+  "Actually make it Outlook":
+    extractions:
+      - { requirement: trigger, value: outlook_trigger, span: Outlook }
+  "Alerts":
+    extractions:
+      - { requirement: trigger.monitor_location, value: Alerts, span: Alerts }
+  "Gmail Finance label to Slack #finance, ignore duplicates":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: trigger.monitor_location, value: Finance, span: Finance label }
+      - { requirement: action, value: slack_notify, span: Slack }
+      - { requirement: action.channel, value: "#finance", span: "#finance" }
+      - { requirement: dedupe.enabled, value: "true", span: ignore duplicates }
+  "Actually change it to above ₹50,000":
+    extractions:
+      - { requirement: filter.operator, value: gt, span: above }
+      - { requirement: filter.value, value: "50000", span: "₹50,000" }
+  "When a new invoice arrives in Gmail, post it to Discord":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+    unsupported:
+      - { requirement: action, span: Discord }
+  "Send new Typeform responses to Slack":
+    extractions:
+      - { requirement: action, value: slack_notify, span: Slack }
+    unsupported:
+      - { requirement: trigger, span: Typeform }
+  "Use a webhook then, at /typeform":
+    extractions:
+      - { requirement: trigger, value: webhook_trigger, span: webhook }
+      - { requirement: trigger.path, value: /typeform, span: /typeform }
+  "#leads":
+    extractions:
+      - { requirement: action.channel, value: "#leads", span: "#leads" }
+  "When someone tweets about us, text me on WhatsApp":
+    extractions:
+      # Hallucination: "text me" does not name email.
+      - { requirement: action, value: email_send, span: text me }
+    unsupported:
+      - { requirement: trigger, span: tweets }
+      - { requirement: action, span: WhatsApp }
+  "Notify the finance team about new invoices":
+    extractions:
+      # Every one of these is a guess. None may reach the state.
+      - { requirement: trigger, value: gmail_trigger, span: new invoices }
+      - { requirement: action, value: slack_notify, span: Notify }
+      - { requirement: action.channel, value: "#finance", span: finance team }
+      - { requirement: dedupe.enabled, value: "true", span: new invoices }
+  "Set up an automation for invoices": {}
+  "I'm not sure": {}
+  "hmm, whatever you think":
+    extractions:
+      # Being told to choose is not being told what to choose.
+      - { requirement: trigger, value: gmail_trigger, span: whatever you think }
+  "Send Slack alerts for new Gmail messages":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: action, value: slack_notify, span: Slack }
+      # Hallucinations: a default label and a dedupe preference nobody stated.
+      - { requirement: trigger.monitor_location, value: Inbox, span: Inbox }
+      - { requirement: dedupe.enabled, value: "true", span: alerts }
+  "When a new email hits my Gmail Orders label, call the API at https://api.acme.com/orders":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: trigger.monitor_location, value: Orders, span: Orders label }
+      - { requirement: action, value: http_request, span: call the API }
+      - { requirement: action.url, value: "https://api.acme.com/orders", span: "https://api.acme.com/orders" }
+  "every order":
+    extractions:
+      - { requirement: filter.mode, value: all, span: every }
+  "POST":
+    extractions:
+      - { requirement: action.method, value: POST, span: POST }
+  "Outlook Expenses folder to email finance@acme.com when amount is below $100":
+    extractions:
+      - { requirement: trigger, value: outlook_trigger, span: Outlook }
+      - { requirement: trigger.monitor_location, value: Expenses, span: Expenses folder }
+      - { requirement: action, value: email_send, span: email }
+      - { requirement: action.recipient, value: finance@acme.com, span: finance@acme.com }
+      - { requirement: filter.mode, value: filtered, span: below }
+      - { requirement: filter.field, value: amount, span: amount }
+      - { requirement: filter.operator, value: lt, span: below }
+      - { requirement: filter.value, value: "100", span: "$100" }
+  "Gmail Support label, only emails whose subject contains urgent, to Slack #support":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+      - { requirement: trigger.monitor_location, value: Support, span: Support label }
+      - { requirement: filter.mode, value: filtered, span: only }
+      - { requirement: filter.field, value: subject, span: subject }
+      - { requirement: filter.operator, value: contains, span: contains }
+      - { requirement: filter.value, value: urgent, span: urgent }
+      - { requirement: action, value: slack_notify, span: Slack }
+      - { requirement: action.channel, value: "#support", span: "#support" }
+
 question:
   trigger:
     ask: Which platform receives the invoice?
