@@ -101,6 +101,8 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+On Windows, keep the checkout at a short path or enable long paths: the `anthropic` package has deeply nested files, and pip skips them without an error when the full path passes 260 characters.
+
 Open http://localhost:8000. With `ANTHROPIC_API_KEY` set the agent uses Claude (`claude-opus-5` by default, override with `ANTHROPIC_MODEL`). Without a key it uses the offline stub, which only knows the scripted messages in `src/llm/stub_responses.yaml`; the example request on the start screen is one of them.
 
 With Docker:
