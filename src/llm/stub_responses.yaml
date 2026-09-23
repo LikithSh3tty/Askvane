@@ -1,0 +1,94 @@
+# Lookup table for the stub provider.
+#
+# `extraction` maps a user utterance (matched case- and whitespace-insensitively)
+# to what a model might read out of it. Values are always strings, exactly as a
+# real provider returns them. Entries may name requirements that are not open
+# yet, or claim things the user never said; the extractor and the grounding
+# guard are what keep those out of the state.
+#
+# `question` maps a requirement id (optionally `id:node_type`) to a first ask and
+# a rephrase for when the plain ask has already failed twice.
+
+ambiguity_template: 'When you say "{span}", do you mean {options}?'
+
+extraction:
+  # ------------------------------------------------ reference conversation
+  "Whenever a new invoice arrives, notify my finance team.":
+    extractions:
+      # Both of these are hallucinations. The guard must reject them.
+      - { requirement: action, value: slack_notify, span: notify my finance team }
+      - { requirement: action.channel, value: "#finance", span: "#finance" }
+  "Gmail":
+    extractions:
+      - { requirement: trigger, value: gmail_trigger, span: Gmail }
+  "Finance":
+    extractions:
+      - { requirement: trigger.monitor_location, value: Finance, span: Finance }
+  "Only above ₹10,000":
+    extractions:
+      - { requirement: filter.mode, value: filtered, span: Only above }
+      - { requirement: filter.field, value: amount, span: "₹" }
+      - { requirement: filter.operator, value: gt, span: above }
+      - { requirement: filter.value, value: "10000", span: "₹10,000" }
+  "Slack":
+    extractions:
+      - { requirement: action, value: slack_notify, span: Slack }
+  "#finance channel":
+    extractions:
+      - { requirement: action.channel, value: "#finance", span: "#finance" }
+  "Yes":
+    extractions:
+      - { requirement: dedupe.enabled, value: "true", span: "Yes" }
+
+question:
+  trigger:
+    ask: Which platform receives the invoice?
+    rephrase: "I need to know what starts this workflow. Please pick one: Gmail, Outlook, a webhook, or a schedule."
+  trigger.monitor_location:gmail_trigger:
+    ask: Which Gmail label or folder should I monitor?
+    rephrase: "Which Gmail label should I watch? For example: Finance, Inbox, or Invoices."
+  trigger.monitor_location:outlook_trigger:
+    ask: Which Outlook folder should I monitor?
+    rephrase: "Which Outlook folder should I watch? For example: Inbox or Invoices."
+  trigger.path:
+    ask: Which URL path should the webhook listen on?
+    rephrase: "Please give me the webhook path, for example /invoices."
+  trigger.frequency:
+    ask: How often should the workflow run?
+    rephrase: "Please pick one: hourly, daily, or weekly."
+  trigger.time:
+    ask: What time of day should it run?
+    rephrase: "Please give me a time, for example 09:00."
+  trigger.day_of_week:
+    ask: Which day of the week should it run?
+    rephrase: "Please name a day, Monday to Sunday."
+  filter.mode:
+    ask: Should every invoice trigger the workflow, or only invoices above a certain amount?
+    rephrase: "Should I act on every item, or only on items that match a condition (for example, an amount above a limit)?"
+  filter.field:
+    ask: Which field should the condition check?
+    rephrase: "Please pick the field to check: amount, subject, or sender."
+  filter.operator:
+    ask: How should that value be compared?
+    rephrase: "Please pick a comparison: above, below, equal to, or contains."
+  filter.value:
+    ask: Which value should I compare against?
+    rephrase: "Please give me the exact value, for example 10,000."
+  action:
+    ask: Where should the notification be sent?
+    rephrase: "Please pick where the result goes: Slack, email, or an HTTP request."
+  action.channel:
+    ask: Which Slack workspace and channel?
+    rephrase: "Which Slack channel should I post in? For example: #finance."
+  action.recipient:
+    ask: Which email address should receive the notification?
+    rephrase: "Please give me the full email address, for example finance@company.com."
+  action.url:
+    ask: Which URL should the request be sent to?
+    rephrase: "Please give me the full URL, starting with https://."
+  action.method:
+    ask: Which HTTP method should the request use?
+    rephrase: "Please pick one: GET, POST, or PUT."
+  dedupe.enabled:
+    ask: Should duplicate invoices be ignored?
+    rephrase: "If the same item arrives twice, should I skip the second one? Yes or no."
