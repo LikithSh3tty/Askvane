@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Askvane</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #E9EDF1;
+    --sheet: #FBFCFD;
+    --ink: #1C2833;
+    --ink-soft: #5B6875;
+    --rule: #CDD5DD;
+    --cobalt: #2F5BEA;
+    --cobalt-wash: #DCE5FD;
+    --teal: #1F7A64;
+    --teal-wash: #DDEFE9;
+    --user: #1C2833;
+    --user-ink: #F3F6F9;
+    --danger: #A33A2B;
+    --radius-lg: 14px;
+    --radius-sm: 8px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #121A22;
+      --sheet: #18222C;
+      --ink: #E4EAF0;
+      --ink-soft: #93A1AE;
+      --rule: #2C3A47;
+      --cobalt: #7D9BFF;
+      --cobalt-wash: #22325C;
+      --teal: #5CC7A8;
+      --teal-wash: #173A32;
+      --user: #E4EAF0;
+      --user-ink: #121A22;
+      --danger: #F08A78;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #121A22; --sheet: #18222C; --ink: #E4EAF0; --ink-soft: #93A1AE; --rule: #2C3A47;
+    --cobalt: #7D9BFF; --cobalt-wash: #22325C; --teal: #5CC7A8; --teal-wash: #173A32;
+    --user: #E4EAF0; --user-ink: #121A22; --danger: #F08A78; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 15px/1.55 "Schibsted Grotesk", system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+  svg.icon { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none;
+             stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  .shell { max-width: 1180px; margin: 0 auto; padding: 28px 24px 48px; }
+
+  header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+               margin-bottom: 22px; flex-wrap: wrap; }
+  .brand h1 { font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+  .brand p { margin: 4px 0 0; color: var(--ink-soft); max-width: 52ch; }
+  .top-actions { display: flex; align-items: center; gap: 12px; }
+  .provider { color: var(--ink-soft); font-size: 13px; }
+  .btn-quiet { background: none; border: 1px solid var(--rule); border-radius: 999px; padding: 7px 14px;
+               cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+  .btn-quiet:hover { border-color: var(--ink-soft); }
+
+  .board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 20px; align-items: start; }
+
+  /* chat */
+  .chat { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius-lg);
+          display: flex; flex-direction: column; height: min(640px, 72vh); min-height: 420px; }
+  .log { flex: 1; overflow-y: auto; padding: 20px 20px 8px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 82%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.user { align-self: flex-end; background: var(--user); color: var(--user-ink); border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--paper); border-bottom-left-radius: 4px; }
+  .msg.agent.done { background: var(--teal-wash); display: flex; gap: 8px; align-items: flex-start; }
+  .msg.agent.done svg { color: var(--teal); margin-top: 3px; }
+  .msg.note { align-self: center; background: none; color: var(--danger); font-size: 14px; text-align: center; }
+  .msg.pending { color: var(--ink-soft); }
+  .msg.pending span { display: inline-block; animation: blink 1.2s infinite; }
+  .msg.pending span:nth-child(2) { animation-delay: .2s; }
+  .msg.pending span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+  .empty { margin: auto; text-align: center; color: var(--ink-soft); max-width: 40ch; padding: 24px 8px; }
+  .empty p { margin: 0 0 14px; }
+  .example { background: none; border: 1px dashed var(--rule); border-radius: var(--radius-sm);
+             padding: 10px 14px; cursor: pointer; text-align: left; color: var(--ink); }
+  .example:hover { border-color: var(--cobalt); }
+
+  form.composer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--rule); }
+  form.composer input { flex: 1; min-width: 0; border: 1px solid var(--rule); background: var(--paper);
+                        border-radius: 999px; padding: 10px 16px; }
+  form.composer button { border: 0; border-radius: 999px; padding: 0 18px; background: var(--ink); color: var(--sheet);
+                         cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+  form.composer button:disabled { opacity: .45; cursor: default; }
+
+  /* the collected-information sheet */
+  .sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius-lg); padding: 20px; }
+  .sheet h2 { font-size: 17px; margin: 0; font-weight: 600; }
+  .meter { margin: 10px 0 14px; display: flex; align-items: center; gap: 10px; color: var(--ink-soft); font-size: 13px; }
+  .meter .track { flex: 1; height: 4px; background: var(--rule); border-radius: 4px; overflow: hidden; }
+  .meter .fill { height: 100%; width: 0; background: var(--cobalt); transition: width .5s ease; }
+  .sheet.complete .meter .fill { background: var(--teal); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; vertical-align: top; border-top: 1px solid var(--rule); }
+  th { font-weight: 500; color: var(--ink-soft); width: 44%; font-size: 14px; }
+  td { font-weight: 500; overflow-wrap: anywhere; }
+  td.unset { color: var(--ink-soft); font-weight: 400; }
+  tr.status td { font-weight: 600; }
+  .sheet.complete tr.status td { color: var(--teal); }
+  tr.fresh td, tr.fresh th { animation: land 1.8s ease-out; }
+  @keyframes land { 0% { background: var(--cobalt-wash); } 100% { background: transparent; } }
+
+  /* the generated workflow */
+  .workflow { margin-top: 20px; background: var(--sheet); border: 1px solid var(--rule);
+              border-radius: var(--radius-lg); padding: 20px; }
+  .workflow[hidden] { display: none; }
+  .workflow h2 { font-size: 17px; margin: 0 0 16px; font-weight: 600; }
+  .flow { display: flex; align-items: center; gap: 0; overflow-x: auto; padding-bottom: 6px; }
+  .node { flex: none; width: 150px; border: 1px solid var(--rule); border-radius: var(--radius-sm);
+          padding: 10px 12px; background: var(--paper); }
+  .node .kind { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; line-height: 1.25; }
+  .node .detail { color: var(--ink-soft); font-size: 13px; margin-top: 4px; overflow-wrap: anywhere; }
+  .node.trigger { border-color: var(--cobalt); }
+  .node.end { width: auto; min-width: 84px; }
+  .link { flex: none; width: 28px; height: 1px; background: var(--ink-soft); position: relative; }
+  .link::after { content: ""; position: absolute; right: -1px; top: -3px; border: 3.5px solid transparent;
+                 border-left: 5px solid var(--ink-soft); border-right: 0; }
+  .fork { display: flex; flex-direction: column; gap: 12px; position: relative; padding-left: 28px; flex: none; }
+  .fork::before { content: ""; position: absolute; left: 0; top: 50%; width: 14px; height: 1px; background: var(--ink-soft); }
+  .fork::after { content: ""; position: absolute; left: 14px; top: 25%; bottom: 25%; width: 1px; background: var(--ink-soft); }
+  .branch { display: flex; align-items: center; }
+  .branch .tag { font-size: 12px; font-weight: 600; width: 34px; padding-left: 4px; }
+  .branch.yes .tag { color: var(--teal); }
+  .branch.no .tag { color: var(--ink-soft); }
+  details.json { margin-top: 16px; }
+  details.json summary { cursor: pointer; color: var(--ink-soft); font-size: 14px; }
+  details.json pre { background: var(--paper); border-radius: var(--radius-sm); padding: 12px; overflow: auto;
+                     font-size: 12.5px; max-height: 320px; }
+
+  @media (max-width: 860px) {
+    .board { grid-template-columns: 1fr; }
+    .chat { height: 60vh; }
+  }
+  @media (max-width: 560px) {
+    .shell { padding: 20px 16px 36px; }
+    .flow { flex-direction: column; align-items: stretch; }
+    .node { width: 100%; }
+    .link { width: 1px; height: 18px; margin-left: 20px; }
+    .link::after { right: -3px; top: auto; bottom: -1px; border: 3.5px solid transparent;
+                   border-top: 5px solid var(--ink-soft); border-bottom: 0; }
+    .fork { padding-left: 0; }
+    .fork::before, .fork::after { display: none; }
+    .branch { flex-direction: column; align-items: stretch; }
+    .branch .tag { padding: 0 0 4px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    tr.fresh td, tr.fresh th, .msg.pending span { animation: none; }
+    .meter .fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div class="brand">
+      <h1>Askvane</h1>
+      <p>Describe an automation in your own words. I ask about anything missing, one question at a time, and never fill a gap with a guess.</p>
+    </div>
+    <div class="top-actions">
+      <span class="provider" id="provider"></span>
+      <button class="btn-quiet" id="reset" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        Start over
+      </button>
+    </div>
+  </header>
+
+  <div class="board">
+    <section class="chat" aria-label="Conversation">
+      <div class="log" id="log" aria-live="polite">
+        <div class="empty" id="empty">
+          <p>Tell me what should happen, and when. For example:</p>
+          <button class="example" type="button" id="example">Whenever a new invoice arrives, notify my finance team.</button>
+        </div>
+      </div>
+      <form class="composer" id="composer">
+        <label for="input" class="sr-only" style="position:absolute;left:-9999px">Message</label>
+        <input id="input" autocomplete="off" placeholder="Describe your automation" maxlength="2000">
+        <button type="submit" id="send">
+          Send
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+    </section>
+
+    <aside class="sheet" id="sheet" aria-label="Collected information">
+      <h2>Collected information</h2>
+      <div class="meter"><div class="track"><div class="fill" id="fill"></div></div><span id="meter-text">Nothing yet</span></div>
+      <table><tbody id="rows"></tbody></table>
+    </aside>
+  </div>
+
+  <section class="workflow" id="workflow" hidden aria-label="Generated workflow">
+    <h2>Generated workflow</h2>
+    <div class="flow" id="flow"></div>
+    <details class="json"><summary>Workflow JSON</summary><pre id="json"></pre></details>
+  </section>
+</div>
+
+<script>
+const ROWS = ["Trigger Source", "Monitor Location", "Condition", "Notification Channel",
+              "Channel / Recipient", "Duplicate Handling", "Additional Preferences", "Status"];
+const UNSET = "–";
+const ICONS = {
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  hook: '<path d="M9 17a4 4 0 1 1 1.5-7.7L14 3"/><path d="M15 17h-6"/><path d="M15 17a4 4 0 1 0 3.5-5.9L15 7"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  hash: '<path d="M5 9h14M5 15h14M10 4l-2 16M16 4l-2 16"/>',
+  send: '<path d="M4 12l16-8-6 16-2-7z"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  filter: '<path d="M4 5h16l-6 7v6l-4 2v-8z"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  scan: '<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 12h8"/>',
+  branch: '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 8v8M18 10c0 4-6 3-10 7"/>',
+  stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+};
+const NODE_ICON = {
+  gmail_trigger: "mail", outlook_trigger: "mail", webhook_trigger: "hook", schedule_trigger: "clock",
+  slack_notify: "hash", email_send: "send", http_request: "globe", filter_by_label: "filter",
+  deduplicate: "copy", extract_fields: "scan", condition: "branch", end: "stop",
+};
+const OPS = { gt: ">", lt: "<", eq: "=", contains: "contains" };
+
+const $ = (id) => document.getElementById(id);
+const icon = (name) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ""}</svg>`;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+let sessionId = null;
+let previous = {};
+let busy = false;
+
+function addMessage(role, text, extra = "") {
+  $("empty")?.remove();
+  const el = document.createElement("div");
+  el.className = `msg ${role} ${extra}`.trim();
+  if (extra === "done") el.innerHTML = icon("check") + `<span>${esc(text)}</span>`;
+  else el.textContent = text;
+  $("log").appendChild(el);
+  $("log").scrollTop = $("log").scrollHeight;
+  return el;
+}
+
+function renderTable(rows) {
+  const values = Object.fromEntries((rows || []).map((r) => [r.parameter, r.value]));
+  $("rows").innerHTML = ROWS.map((p) => {
+    const v = values[p] ?? UNSET;
+    const fresh = previous[p] !== undefined && previous[p] !== v && v !== UNSET ? " fresh" : "";
+    const status = p === "Status" ? " status" : "";
+    return `<tr class="${(fresh + status).trim()}"><th scope="row">${esc(p)}</th>` +
+           `<td class="${v === UNSET ? "unset" : ""}">${esc(v === UNSET && p === "Status" ? "Waiting for your request" : v)}</td></tr>`;
+  }).join("");
+  previous = Object.fromEntries(ROWS.map((p) => [p, values[p] ?? UNSET]));
+
+  const known = ROWS.slice(0, 6).filter((p) => (values[p] ?? UNSET) !== UNSET).length;
+  const complete = values.Status === "All information collected";
+  $("sheet").classList.toggle("complete", complete);
+  $("fill").style.width = complete ? "100%" : `${Math.round((known / 6) * 100)}%`;
+  $("meter-text").textContent = complete ? "Complete" : (values.Status && values.Status !== UNSET ? values.Status : "Nothing yet");
+}
+
+function describe(node) {
+  const p = node.params || {};
+  switch (node.type) {
+    case "filter_by_label": return p.label;
+    case "deduplicate": return "Skip repeats";
+    case "extract_fields": return (p.fields || []).join(", ");
+    case "condition": return `${p.field} ${OPS[p.operator] || p.operator} ${Number.isFinite(p.value) ? p.value.toLocaleString() : p.value}`;
+    case "slack_notify": return p.channel;
+    case "email_send": return p.recipient;
+    case "http_request": return `${p.method} ${p.url}`;
+    case "webhook_trigger": return `${p.method || "POST"} ${p.path}`;
+    case "schedule_trigger": return [p.frequency, p.day_of_week, p.time].filter(Boolean).join(", ");
+    case "gmail_trigger": case "outlook_trigger": return "New email";
+    default: return "";
+  }
+}
+
+function nodeHtml(node) {
+  const kind = node.type.endsWith("_trigger") ? "trigger" : node.type === "end" ? "end" : "";
+  const detail = describe(node);
+  return `<div class="node ${kind}"><div class="kind">${icon(NODE_ICON[node.type])}<span>${esc(node.label)}</span></div>` +
+         (detail ? `<div class="detail">${esc(detail)}</div>` : "") + `</div>`;
+}
+
+function renderWorkflow(wf) {
+  if (!wf) { $("workflow").hidden = true; return; }
+  const byId = Object.fromEntries(wf.nodes.map((n) => [n.id, n]));
+  const out = (id) => wf.edges.filter((e) => e.from === id);
+  const targets = new Set(wf.edges.map((e) => e.to));
+  let current = wf.nodes.find((n) => !targets.has(n.id));
+  const parts = [];
+  while (current) {
+    parts.push(nodeHtml(current));
+    const edges = out(current.id);
+    if (edges.some((e) => e.branch)) {
+      const branch = (name) => {
+        const e = edges.find((x) => x.branch === name);
+        return e ? `<div class="branch ${name}"><span class="tag">${name === "yes" ? "Yes" : "No"}</span>${nodeHtml(byId[e.to])}</div>` : "";
+      };
+      parts.push(`<div class="link"></div><div class="fork">${branch("yes")}${branch("no")}</div>`);
+      break;
+    }
+    current = edges.length ? byId[edges[0].to] : null;
+    if (current) parts.push('<div class="link"></div>');
+  }
+  $("flow").innerHTML = parts.join("");
+  $("json").textContent = JSON.stringify(wf, null, 2);
+  $("workflow").hidden = false;
+}
+
+async function send(text) {
+  if (busy || !text.trim()) return;
+  busy = true;
+  $("send").disabled = true;
+  addMessage("user", text);
+  const pending = addMessage("agent", "", "pending");
+  pending.innerHTML = "Reading<span>.</span><span>.</span><span>.</span>";
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, message: text }),
+    });
+    const body = await res.json();
+    pending.remove();
+    if (!res.ok) {
+      if (res.status === 404) sessionId = null;
+      addMessage("note", body.detail || `Request failed with status ${res.status}.`);
+      return;
+    }
+    sessionId = body.session_id;
+    addMessage("agent", body.reply, body.complete ? "done" : "");
+    renderTable(body.state_table);
+    renderWorkflow(body.workflow);
+  } catch (err) {
+    pending.remove();
+    addMessage("note", "Could not reach the server. Check that it is running, then send again.");
+  } finally {
+    busy = false;
+    $("send").disabled = false;
+    $("input").focus();
+  }
+}
+
+$("composer").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = $("input").value;
+  $("input").value = "";
+  send(text);
+});
+$("example").addEventListener("click", (e) => send(e.currentTarget.textContent));
+$("reset").addEventListener("click", async () => {
+  if (sessionId) await fetch(`/session/${sessionId}`, { method: "DELETE" }).catch(() => {});
+  location.reload();
+});
+
+fetch("/health").then((r) => r.json()).then((h) => {
+  $("provider").textContent = h.provider === "stub" ? "Offline stub model" : "Claude";
+}).catch(() => {});
+renderTable([]);
+</script>
+</body>
+</html>
