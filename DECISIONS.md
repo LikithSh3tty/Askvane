@@ -1,10 +1,42 @@
 # Decisions
 
-Short records of the choices behind this codebase. Each entry says what was decided and why.
+Short records of the choices behind this codebase. Each entry says what was decided and why. The first section covers the architecture; the second covers calls the build spec left open or got wrong.
+
+# Core design
+
+## Completeness is decided by code, not by the model
+
+Whether every mandatory item is known is a property of a data structure: is each required param of each chosen node set, and is there a trigger and an action. That is checkable, so `engine.is_complete` checks it. Asking a model "do you have enough now?" would turn a reliable answer into a probabilistic one, and it would make the accuracy numbers depend on the model's mood rather than on the design.
+
+## Extraction is restricted to currently open requirements
+
+The model is shown only the requirements that are open this turn (plus optional params of nodes already chosen), and anything it returns for another slot is dropped before grounding. A model cannot fill a slot it was not offered. On the reference opening "notify my finance team", the Slack channel requirement does not exist yet, so a hallucinated `#finance` has nowhere to go.
+
+## Grounding verifies spans instead of trusting the model
+
+Every extracted value must come with the exact words it was read from. Code checks that those words are in the user's message this turn, that the value is an allowed option, and that the words actually say that value. An instruction in a prompt is a request; a span check is a guarantee. This is the brief's "never assume missing information" made structural rather than instructed.
+
+## Requirements are computed every turn, not held as a checklist
+
+The set of questions is not fixed. Choosing Gmail creates a label requirement that did not exist a moment ago; choosing Slack creates a channel requirement, choosing email creates a recipient instead; saying "only above ₹10,000" creates field, operator and value. `engine.requirements` derives the open set from the current state on every call, so a change of mind (Slack to email) removes the old requirements and adds the new ones with no bookkeeping.
+
+## Ambiguity asks instead of picking
+
+The brief asks the agent to detect "whether multiple interpretations exist". If the user's words name more than one option ("an email" fits Gmail and Outlook) or one phrase answers two different text slots, the agent quotes the words back and asks. Picking the likelier reading would be an assumption with extra steps. The one exception is when the user was answering a specific question: "Finance" in reply to "Which label?" is the label.
+
+## One question per turn
+
+The brief and its reference both ask one question at a time. It also keeps each answer attributable: when a reply is short ("Finance"), the question just asked tells both the model and the ambiguity check what it answers. `next_question` returns one requirement, never a list; a requirement asked twice without an answer is flagged so the third ask is worded differently.
 
 ## Sessions live in memory, no database
 
 Sessions are a plain dict keyed by session id inside the API process. The assignment asks for a conversation that collects information and emits a workflow; nothing in it needs state to survive a restart. Redis or Postgres would be infrastructure to explain rather than engineering to show, so it is left out on purpose.
+
+## The stub provider exists so nothing needs the network
+
+Every LLM call goes through one interface, and the stub implements it from a lookup table. The whole test suite and the eval run offline with no key. The stub also plays a badly behaved model on purpose: its table includes hallucinations (Slack read out of "notify", `#finance` out of "finance team") so the guard is tested against the failure it exists to stop. An input it has no entry for raises, rather than returning something plausible.
+
+# Decisions the spec did not cover
 
 ## httpx is a dependency
 
