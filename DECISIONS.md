@@ -69,3 +69,11 @@ The reference workflow shows "Filter by Label" and "Extract Invoice & Amount" st
 ## No emoji in replies
 
 The reference shows a check-mark emoji on the final message. Replies and the state table use plain text ("All information collected"); the UI draws its own icon. Plain text keeps API output clean for any client that is not a browser.
+
+## The eval's `assumed` check does not trust the guard
+
+`run_eval.py` flags a conversation as `assumed` if any value in the final state is either missing from the conversation's expected values or has no textual evidence anywhere in what the user typed. It shares the alias table with the guard but not its logic, so switching the guard off (`--no-grounding`) shows up as `assumed` failures rather than passing silently. That ablation result is committed next to the real one.
+
+## What the stub eval does and does not measure
+
+With the stub, the "model" is a lookup table, so a 25/25 score measures the deterministic layers: offer restriction, grounding, ambiguity, ordering, corrections and generation, against readings that include deliberate hallucinations. It says nothing about how well a real model reads free text. `--provider anthropic` runs the same conversations against Claude; those numbers are the ones that measure extraction quality.
