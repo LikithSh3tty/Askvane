@@ -45,3 +45,27 @@ A span check alone is not enough: a model can quote real text ("finance team") a
 ## Aliases live in the catalog
 
 Mapping "Yes" to `true`, "above" to `gt` and "₹" to the amount field is data, not code, so it sits next to the enum it describes. The same aliases drive the ambiguity check: if a span names more than one option, the agent asks.
+
+## A small turn loop in `src/agent.py`
+
+The spec's layout has no module for the turn itself. `agent.py` is the one place the pieces meet: it offers requirements, calls the extractor, runs grounding and the ambiguity check, applies what survives, then either asks one question or generates. Every decision in it is deterministic; the LLM is only reached through the extractor and the phraser.
+
+## One message is read more than once when it opens new requirements
+
+"Use Gmail, label Finance" answers the trigger and then the label, but the label requirement does not exist until Gmail is chosen. After applying a pass, the loop offers any newly opened requirements and reads the same message again, at most three passes. The model is still only ever offered what is open at that moment.
+
+## Changes of mind reopen filled requirements, only when the user signals one
+
+Extraction is restricted to open requirements, which on its own would make "actually, send it by email instead" impossible to act on. When the message contains a correction marker ("actually", "instead", "change", "switch", ...), already-filled requirements are offered as well. Changing a node type clears that node's params, so switching from Slack to email drops the channel and opens the recipient.
+
+## Unsupported requests are declined, then the question is asked again
+
+When the user names something the catalog cannot express ("post it to Discord"), the extractor reports it as unsupported, and deterministic code confirms the span is real and matches none of the options. The agent says it cannot do that, lists what it can, and keeps the requirement open. It never maps Discord onto the nearest thing it does support.
+
+## Derived nodes
+
+The reference workflow shows "Filter by Label" and "Extract Invoice & Amount" steps that the user never chose. The generator derives them: a label or folder on a mail trigger becomes a filter node, and a condition on a field becomes an extract step for that field. They are consequences of what the user said, not new values, so they are not asked about.
+
+## No emoji in replies
+
+The reference shows a check-mark emoji on the final message. Replies and the state table use plain text ("All information collected"); the UI draws its own icon. Plain text keeps API output clean for any client that is not a browser.
