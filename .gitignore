@@ -11,3 +11,6 @@ __pycache__/
 # assignment material, kept local only
 Digitomics_Assignment.pdf
 clarification_agent_spec.md
+
+# local design-tool config
+.impeccable/

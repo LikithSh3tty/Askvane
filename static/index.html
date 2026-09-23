@@ -6,159 +6,195 @@
 <title>Askvane</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #E9EDF1;
-    --sheet: #FBFCFD;
-    --ink: #1C2833;
-    --ink-soft: #5B6875;
-    --rule: #CDD5DD;
-    --cobalt: #2F5BEA;
-    --cobalt-wash: #DCE5FD;
-    --teal: #1F7A64;
-    --teal-wash: #DDEFE9;
-    --user: #1C2833;
-    --user-ink: #F3F6F9;
-    --danger: #A33A2B;
-    --radius-lg: 14px;
-    --radius-sm: 8px;
+    --page: #FFFFFF;
+    --ink: #111827;
+    --ink-soft: #6B7280;
+    --line: #EDE3DC;
+    --coral: #E97142;
+    --coral-soft: #F0906B;
+    --coral-deep: #A3462A;
+    --coral-wash: #FDEEE7;
+    --band: #B8550F;
+    --band-ink: #FFF6F0;
+    --panel: #FFF8F4;
+    --card: #FFFFFF;
+    --good: #15803D;
+    --good-wash: #E7F5EC;
+    --danger: #B42318;
+    --grad: linear-gradient(135deg, var(--coral-soft) 0%, var(--coral) 100%);
+    /* text sits on this one: #C4552A keeps white at 4.5:1 */
+    --grad-ink: linear-gradient(135deg, #C4552A 0%, #A3462A 100%);
+    --lift: 0 1px 2px rgba(163, 70, 42, .06), 0 6px 18px rgba(163, 70, 42, .08);
+    --glow: 0 6px 18px rgba(233, 113, 66, .35);
+    --glow-hover: 0 10px 24px rgba(233, 113, 66, .42);
+    --bubble: 0 4px 12px rgba(233, 113, 66, .22);
+    --panel-shadow: 0 10px 30px rgba(60, 20, 0, .18);
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --paper: #121A22;
-      --sheet: #18222C;
-      --ink: #E4EAF0;
-      --ink-soft: #93A1AE;
-      --rule: #2C3A47;
-      --cobalt: #7D9BFF;
-      --cobalt-wash: #22325C;
-      --teal: #5CC7A8;
-      --teal-wash: #173A32;
-      --user: #E4EAF0;
-      --user-ink: #121A22;
-      --danger: #F08A78;
+      --page: #0F131A; --ink: #F3F4F6; --ink-soft: #A2A9B4; --line: #2B2522;
+      --coral: #F0845A; --coral-soft: #F5A27F; --coral-deep: #F6B394; --coral-wash: #3A2219;
+      --band: #5A2A10; --band-ink: #FCE7DC; --panel: #17130F; --card: #1E1915;
+      --good: #4ADE80; --good-wash: #14301F; --danger: #F59E8B;
+      --lift: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 22px rgba(0, 0, 0, .35);
+      --glow: 0 4px 12px rgba(0, 0, 0, .45); --glow-hover: 0 8px 18px rgba(0, 0, 0, .5);
+      --bubble: 0 4px 12px rgba(0, 0, 0, .35); --panel-shadow: 0 10px 30px rgba(0, 0, 0, .45);
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --paper: #121A22; --sheet: #18222C; --ink: #E4EAF0; --ink-soft: #93A1AE; --rule: #2C3A47;
-    --cobalt: #7D9BFF; --cobalt-wash: #22325C; --teal: #5CC7A8; --teal-wash: #173A32;
-    --user: #E4EAF0; --user-ink: #121A22; --danger: #F08A78; color-scheme: dark;
+    --page: #0F131A; --ink: #F3F4F6; --ink-soft: #A2A9B4; --line: #2B2522;
+    --coral: #F0845A; --coral-soft: #F5A27F; --coral-deep: #F6B394; --coral-wash: #3A2219;
+    --band: #5A2A10; --band-ink: #FCE7DC; --panel: #17130F; --card: #1E1915;
+    --good: #4ADE80; --good-wash: #14301F; --danger: #F59E8B;
+    --lift: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 22px rgba(0, 0, 0, .35);
+    --glow: 0 4px 12px rgba(0, 0, 0, .45); --glow-hover: 0 8px 18px rgba(0, 0, 0, .5);
+    --bubble: 0 4px 12px rgba(0, 0, 0, .35); --panel-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+    color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
-    background: var(--paper);
+    background: var(--page);
     color: var(--ink);
-    font: 400 15px/1.55 "Schibsted Grotesk", system-ui, sans-serif;
+    font: 400 14px/1.6 "Geist Mono", ui-monospace, monospace;
     -webkit-font-smoothing: antialiased;
+    caret-color: var(--coral);
   }
+  ::selection { background: var(--coral-wash); color: var(--coral-deep); }
   button, input { font: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
-  svg.icon { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none;
-             stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  :focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+  * { scrollbar-width: thin; scrollbar-color: var(--coral-soft) transparent; }
+  svg.icon { width: 17px; height: 17px; flex: none; stroke: currentColor; fill: none;
+             stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 
-  .shell { max-width: 1180px; margin: 0 auto; padding: 28px 24px 48px; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-  header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
-               margin-bottom: 22px; flex-wrap: wrap; }
-  .brand h1 { font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
-  .brand p { margin: 4px 0 0; color: var(--ink-soft); max-width: 52ch; }
-  .top-actions { display: flex; align-items: center; gap: 12px; }
-  .provider { color: var(--ink-soft); font-size: 13px; }
-  .btn-quiet { background: none; border: 1px solid var(--rule); border-radius: 999px; padding: 7px 14px;
-               cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
-  .btn-quiet:hover { border-color: var(--ink-soft); }
+  /* top bar */
+  header.bar { border-bottom: 1px solid var(--line); background: var(--page); }
+  header.bar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+  .logo-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--grad-ink); display: grid; place-items: center; color: #fff; }
+  .logo-mark svg { width: 16px; height: 16px; }
+  .bar-actions { display: flex; align-items: center; gap: 14px; }
+  .provider { color: var(--ink-soft); font-size: 12px; display: inline-flex; align-items: center; gap: 7px; }
+  .provider::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
+  .btn-pill { border: 0; border-radius: 999px; padding: 9px 18px; cursor: pointer; font-weight: 700; font-size: 14px;
+              display: inline-flex; align-items: center; gap: 8px; background: var(--grad-ink); color: #fff; box-shadow: var(--glow);
+              transition: transform .15s ease-out, box-shadow .15s ease-out; }
+  .btn-pill:hover { transform: translateY(-1px); box-shadow: var(--glow-hover); }
+  .btn-pill:active { transform: translateY(0); }
+  .btn-pill:disabled { opacity: .5; cursor: default; transform: none; }
+
+  /* the orange band */
+  .band { background: var(--band); color: var(--band-ink); padding: 48px 0 56px; }
+  .band-head { text-align: center; margin-bottom: 32px; }
+  .band-head h1 { margin: 0; font-size: clamp(28px, 4.4vw, 48px); line-height: 1.1; font-weight: 800; letter-spacing: -0.035em;
+                  color: #fff; text-wrap: balance; }
+  .band-head p { margin: 12px auto 0; max-width: 64ch; font-size: 16px; }
 
   .board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 20px; align-items: start; }
+  .panel { background: var(--panel); color: var(--ink); border-radius: 20px; box-shadow: var(--panel-shadow); }
+  .panel-head { display: flex; align-items: center; gap: 10px; padding: 18px 20px 0; }
+  .panel-head h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .panel-head .badge { width: 28px; height: 28px; border-radius: 50%; background: var(--grad-ink); color: #fff;
+                       display: grid; place-items: center; flex: none; }
+  .panel-head .badge svg { width: 15px; height: 15px; }
+  .panel-head .sub { color: var(--ink-soft); font-size: 12px; margin-left: auto; }
 
   /* chat */
-  .chat { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius-lg);
-          display: flex; flex-direction: column; height: min(640px, 72vh); min-height: 420px; }
-  .log { flex: 1; overflow-y: auto; padding: 20px 20px 8px; display: flex; flex-direction: column; gap: 10px; }
-  .msg { max-width: 82%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .msg.user { align-self: flex-end; background: var(--user); color: var(--user-ink); border-bottom-right-radius: 4px; }
-  .msg.agent { align-self: flex-start; background: var(--paper); border-bottom-left-radius: 4px; }
-  .msg.agent.done { background: var(--teal-wash); display: flex; gap: 8px; align-items: flex-start; }
-  .msg.agent.done svg { color: var(--teal); margin-top: 3px; }
-  .msg.note { align-self: center; background: none; color: var(--danger); font-size: 14px; text-align: center; }
+  .chat { display: flex; flex-direction: column; height: min(640px, 74vh); min-height: 440px; }
+  .log { flex: 1; overflow-y: auto; padding: 16px 20px 8px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 84%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.user { align-self: flex-end; background: var(--grad-ink); color: #fff; border-bottom-right-radius: 4px;
+              box-shadow: var(--bubble); }
+  .msg.agent { align-self: flex-start; background: var(--card); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .msg.agent.done { background: var(--good-wash); border-color: transparent; color: var(--ink); display: flex; gap: 8px; align-items: flex-start; }
+  .msg.agent.done svg { color: var(--good); margin-top: 3px; }
+  .msg.note { align-self: center; background: none; color: var(--danger); font-size: 12px; text-align: center; max-width: 92%; }
   .msg.pending { color: var(--ink-soft); }
   .msg.pending span { display: inline-block; animation: blink 1.2s infinite; }
   .msg.pending span:nth-child(2) { animation-delay: .2s; }
   .msg.pending span:nth-child(3) { animation-delay: .4s; }
   @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
 
-  .empty { margin: auto; text-align: center; color: var(--ink-soft); max-width: 40ch; padding: 24px 8px; }
+  .empty { margin: auto; text-align: center; color: var(--ink-soft); max-width: 44ch; padding: 24px 8px; }
   .empty p { margin: 0 0 14px; }
-  .example { background: none; border: 1px dashed var(--rule); border-radius: var(--radius-sm);
-             padding: 10px 14px; cursor: pointer; text-align: left; color: var(--ink); }
-  .example:hover { border-color: var(--cobalt); }
+  .example { background: var(--card); border: 1.5px dashed var(--coral-soft); border-radius: 12px;
+             padding: 12px 16px; cursor: pointer; text-align: left; color: var(--ink); line-height: 1.5; }
+  .example:hover { border-style: solid; background: var(--coral-wash); }
 
-  form.composer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--rule); }
-  form.composer input { flex: 1; min-width: 0; border: 1px solid var(--rule); background: var(--paper);
-                        border-radius: 999px; padding: 10px 16px; }
-  form.composer button { border: 0; border-radius: 999px; padding: 0 18px; background: var(--ink); color: var(--sheet);
-                         cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
-  form.composer button:disabled { opacity: .45; cursor: default; }
+  form.composer { display: flex; gap: 8px; padding: 12px 14px 14px; }
+  form.composer input { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--card);
+                        border-radius: 999px; padding: 11px 18px; }
+  form.composer input::placeholder { color: var(--ink-soft); }
+  form.composer input:focus { outline: none; border-color: var(--coral); box-shadow: 0 0 0 3px var(--coral-wash); }
 
   /* the collected-information sheet */
-  .sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius-lg); padding: 20px; }
-  .sheet h2 { font-size: 17px; margin: 0; font-weight: 600; }
-  .meter { margin: 10px 0 14px; display: flex; align-items: center; gap: 10px; color: var(--ink-soft); font-size: 13px; }
-  .meter .track { flex: 1; height: 4px; background: var(--rule); border-radius: 4px; overflow: hidden; }
-  .meter .fill { height: 100%; width: 100%; transform: scaleX(0); transform-origin: left; background: var(--cobalt); transition: transform .5s ease; }
-  .sheet.complete .meter .fill { background: var(--teal); }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { text-align: left; padding: 10px 8px; vertical-align: top; border-top: 1px solid var(--rule); }
-  th { font-weight: 500; color: var(--ink-soft); width: 44%; font-size: 14px; }
-  td { font-weight: 500; overflow-wrap: anywhere; }
+  .sheet-body { padding: 14px 20px 20px; }
+  .meter { margin: 0 0 14px; display: flex; align-items: center; gap: 10px; color: var(--ink-soft); font-size: 12px; }
+  .meter .track { flex: 1; height: 6px; background: var(--coral-wash); border-radius: 6px; overflow: hidden; }
+  .meter .fill { height: 100%; width: 100%; transform: scaleX(0); transform-origin: left; background: var(--grad);
+                 transition: transform .5s cubic-bezier(.16, 1, .3, 1); }
+  .sheet.complete .meter .fill { background: var(--good); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+  th, td { text-align: left; padding: 9px 12px; vertical-align: top; background: var(--card); }
+  th { font-weight: 500; color: var(--ink-soft); width: 46%; font-size: 12px; border-radius: 10px 0 0 10px; }
+  td { font-weight: 600; overflow-wrap: anywhere; border-radius: 0 10px 10px 0; }
   td.unset { color: var(--ink-soft); font-weight: 400; }
-  tr.status td { font-weight: 600; }
-  .sheet.complete tr.status td { color: var(--teal); }
-  tr.fresh td, tr.fresh th { animation: land 1.8s ease-out; }
-  @keyframes land { 0% { background: var(--cobalt-wash); } 100% { background: transparent; } }
+  .sheet.complete tr.status td { color: var(--good); }
+  tr.fresh td, tr.fresh th { animation: land 1.8s cubic-bezier(.16, 1, .3, 1); }
+  @keyframes land { 0% { background: var(--coral-wash); } 100% { background: var(--card); } }
 
   /* the generated workflow */
-  .workflow { margin-top: 20px; background: var(--sheet); border: 1px solid var(--rule);
-              border-radius: var(--radius-lg); padding: 20px; }
+  .workflow { margin-top: 20px; }
   .workflow[hidden] { display: none; }
-  .workflow h2 { font-size: 17px; margin: 0 0 16px; font-weight: 600; }
-  .flow { display: flex; align-items: center; gap: 0; overflow-x: auto; padding-bottom: 6px; }
-  .node { flex: none; width: 128px; border: 1px solid var(--rule); border-radius: var(--radius-sm);
-          padding: 10px 12px; background: var(--paper); }
-  .node .kind { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; line-height: 1.25; }
-  .node .detail { color: var(--ink-soft); font-size: 13px; margin-top: 4px; overflow-wrap: anywhere; }
-  .node.trigger { border-color: var(--cobalt); }
-  .node.end { width: auto; min-width: 84px; }
-  .link { flex: none; width: 22px; height: 1px; background: var(--ink-soft); position: relative; }
-  .link::after { content: ""; position: absolute; right: -1px; top: -3px; border: 3.5px solid transparent;
-                 border-left: 5px solid var(--ink-soft); border-right: 0; }
-  .fork { display: flex; flex-direction: column; gap: 12px; position: relative; padding-left: 28px; flex: none; }
-  .fork::before { content: ""; position: absolute; left: 0; top: 50%; width: 14px; height: 1px; background: var(--ink-soft); }
-  .fork::after { content: ""; position: absolute; left: 14px; top: 25%; bottom: 25%; width: 1px; background: var(--ink-soft); }
+  .workflow .body { padding: 18px 20px 20px; }
+  .flow { display: flex; align-items: center; overflow-x: auto; padding: 4px 2px 8px; }
+  .node { flex: none; width: 132px; border-radius: 12px; padding: 10px 12px; background: var(--card); box-shadow: var(--lift); }
+  .node .kind { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12px; line-height: 1.3; letter-spacing: -0.01em; }
+  .node .kind i { width: 26px; height: 26px; border-radius: 50%; background: var(--coral-wash); color: var(--coral);
+                  display: grid; place-items: center; flex: none; }
+  .node .kind i svg { width: 14px; height: 14px; }
+  .node .detail { color: var(--ink-soft); font-size: 12px; margin-top: 6px; overflow-wrap: anywhere; }
+  .node.trigger .kind i { background: var(--grad-ink); color: #fff; }
+  .node.end { width: auto; min-width: 88px; }
+  .node.end .kind i { background: var(--line); color: var(--ink-soft); }
+  .link { flex: none; width: 22px; border-top: 2px dashed var(--coral-soft); position: relative; }
+  .link::after { content: ""; position: absolute; right: -2px; top: -5px; border: 4px solid transparent;
+                 border-left: 5px solid var(--coral-soft); border-right: 0; }
+  .fork { display: flex; flex-direction: column; gap: 14px; position: relative; padding-left: 28px; flex: none; }
+  .fork::before { content: ""; position: absolute; left: 0; top: 50%; width: 14px; border-top: 2px dashed var(--coral-soft); }
+  .fork::after { content: ""; position: absolute; left: 14px; top: 25%; bottom: 25%; border-left: 2px dashed var(--coral-soft); }
   .branch { display: flex; align-items: center; }
-  .branch .tag { font-size: 12px; font-weight: 600; width: 34px; padding-left: 4px; }
-  .branch.yes .tag { color: var(--teal); }
+  .branch .tag { font-size: 12px; font-weight: 700; width: 38px; padding-left: 6px; }
+  .branch.yes .tag { color: var(--good); }
   .branch.no .tag { color: var(--ink-soft); }
   details.json { margin-top: 16px; }
-  details.json summary { cursor: pointer; color: var(--ink-soft); font-size: 14px; }
-  details.json pre { background: var(--paper); border-radius: var(--radius-sm); padding: 12px; overflow: auto;
-                     font-size: 12.5px; max-height: 320px; }
+  details.json summary { cursor: pointer; color: var(--ink-soft); font-size: 12px; }
+  details.json summary:hover { color: var(--coral); }
+  details.json pre { background: var(--card); border-radius: 12px; padding: 14px; overflow: auto;
+                     font-size: 12px; max-height: 320px; margin: 10px 0 0; }
 
-  @media (max-width: 860px) {
+  @media (max-width: 880px) {
     .board { grid-template-columns: 1fr; }
-    .chat { height: 60vh; }
+    .chat { height: 62vh; }
   }
   @media (max-width: 560px) {
-    .shell { padding: 20px 16px 36px; }
+    .wrap { padding: 0 16px; }
+    .band { padding: 32px 0 40px; }
+    .provider { display: none; }
+    .panel-head .sub { display: none; }
     .flow { flex-direction: column; align-items: stretch; }
     .node { width: 100%; }
-    .link { width: 1px; height: 18px; margin-left: 20px; }
-    .link::after { right: -3px; top: auto; bottom: -1px; border: 3.5px solid transparent;
-                   border-top: 5px solid var(--ink-soft); border-bottom: 0; }
+    .link { width: 0; height: 18px; border-top: 0; border-left: 2px dashed var(--coral-soft); margin-left: 24px; }
+    .link::after { right: auto; left: -5px; top: auto; bottom: -2px; border: 4px solid transparent;
+                   border-top: 5px solid var(--coral-soft); border-bottom: 0; }
     .fork { padding-left: 0; }
     .fork::before, .fork::after { display: none; }
     .branch { flex-direction: column; align-items: stretch; }
@@ -166,57 +202,81 @@
   }
   @media (prefers-reduced-motion: reduce) {
     tr.fresh td, tr.fresh th, .msg.pending span { animation: none; }
-    .meter .fill { transition: none; }
+    .meter .fill, .btn-pill { transition: none; }
   }
 </style>
 </head>
 <body>
-<div class="shell">
-  <header class="top">
-    <div class="brand">
-      <h1>Askvane</h1>
-      <p>Describe an automation in your own words. I ask about anything missing, one question at a time, and never fill a gap with a guess.</p>
+<header class="bar">
+  <div class="wrap">
+    <div class="logo">
+      <span class="logo-mark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18l6-12 4 8 2-4 4 8"/></svg></span>
+      Askvane
     </div>
-    <div class="top-actions">
+    <div class="bar-actions">
       <span class="provider" id="provider"></span>
-      <button class="btn-quiet" id="reset" type="button">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      <button class="btn-pill" id="reset" type="button">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
         Start over
       </button>
     </div>
-  </header>
-
-  <div class="board">
-    <section class="chat" aria-label="Conversation">
-      <div class="log" id="log" aria-live="polite">
-        <div class="empty" id="empty">
-          <p>Tell me what should happen, and when. For example:</p>
-          <button class="example" type="button" id="example">Whenever a new invoice arrives, notify my finance team.</button>
-        </div>
-      </div>
-      <form class="composer" id="composer">
-        <label for="input" class="sr-only" style="position:absolute;left:-9999px">Message</label>
-        <input id="input" autocomplete="off" placeholder="Describe your automation" maxlength="2000">
-        <button type="submit" id="send">
-          Send
-          <svg class="icon" viewBox="0 0 24 24"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg>
-        </button>
-      </form>
-    </section>
-
-    <aside class="sheet" id="sheet" aria-label="Collected information">
-      <h2>Collected information</h2>
-      <div class="meter"><div class="track"><div class="fill" id="fill"></div></div><span id="meter-text">Nothing yet</span></div>
-      <table><tbody id="rows"></tbody></table>
-    </aside>
   </div>
+</header>
 
-  <section class="workflow" id="workflow" hidden aria-label="Generated workflow">
-    <h2>Generated workflow</h2>
-    <div class="flow" id="flow"></div>
-    <details class="json"><summary>Workflow JSON</summary><pre id="json"></pre></details>
-  </section>
-</div>
+<main class="band">
+  <div class="wrap">
+    <div class="band-head">
+      <h1>Describe. Clarify. Generate.</h1>
+      <p>Say what should happen in your own words. I ask about anything missing, one question at a time, and never fill a gap with a guess.</p>
+    </div>
+
+    <div class="board">
+      <section class="panel chat" aria-label="Conversation">
+        <div class="panel-head">
+          <span class="badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span>
+          <h2>Conversation</h2>
+          <span class="sub">One question at a time</span>
+        </div>
+        <div class="log" id="log" aria-live="polite">
+          <div class="empty" id="empty">
+            <p>Tell me what should happen, and when. For example:</p>
+            <button class="example" type="button" id="example">Whenever a new invoice arrives, notify my finance team.</button>
+          </div>
+        </div>
+        <form class="composer" id="composer">
+          <label for="input" style="position:absolute;left:-9999px">Message</label>
+          <input id="input" autocomplete="off" placeholder="Describe your automation" maxlength="2000">
+          <button type="submit" id="send" class="btn-pill">
+            Send
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg>
+          </button>
+        </form>
+      </section>
+
+      <aside class="panel sheet" id="sheet" aria-label="Collected information">
+        <div class="panel-head">
+          <span class="badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h10M9 12h10M9 19h10"/><path d="M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg></span>
+          <h2>Collected information</h2>
+        </div>
+        <div class="sheet-body">
+          <div class="meter"><div class="track"><div class="fill" id="fill"></div></div><span id="meter-text">Nothing yet</span></div>
+          <table><tbody id="rows"></tbody></table>
+        </div>
+      </aside>
+    </div>
+
+    <section class="panel workflow" id="workflow" hidden aria-label="Generated workflow">
+      <div class="panel-head">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 8v8M18 10c0 4-6 3-10 7"/></svg></span>
+        <h2>Generated workflow</h2>
+      </div>
+      <div class="body">
+        <div class="flow" id="flow"></div>
+        <details class="json"><summary>Workflow JSON</summary><pre id="json"></pre></details>
+      </div>
+    </section>
+  </div>
+</main>
 
 <script>
 const ROWS = ["Trigger Source", "Monitor Location", "Condition", "Notification Channel",
@@ -300,7 +360,7 @@ function describe(node) {
 function nodeHtml(node) {
   const kind = node.type.endsWith("_trigger") ? "trigger" : node.type === "end" ? "end" : "";
   const detail = describe(node);
-  return `<div class="node ${kind}"><div class="kind">${icon(NODE_ICON[node.type])}<span>${esc(node.label)}</span></div>` +
+  return `<div class="node ${kind}"><div class="kind"><i>${icon(NODE_ICON[node.type])}</i><span>${esc(node.label)}</span></div>` +
          (detail ? `<div class="detail">${esc(detail)}</div>` : "") + `</div>`;
 }
 
