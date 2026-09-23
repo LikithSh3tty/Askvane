@@ -109,3 +109,7 @@ The reference shows a check-mark emoji on the final message. Replies and the sta
 ## What the stub eval does and does not measure
 
 With the stub, the "model" is a lookup table, so a 25/25 score measures the deterministic layers: offer restriction, grounding, ambiguity, ordering, corrections and generation, against readings that include deliberate hallucinations. It says nothing about how well a real model reads free text. `--provider anthropic` runs the same conversations against Claude; those numbers are the ones that measure extraction quality.
+
+## Keys reach the container at run time only
+
+The image contains the app, the catalog and the UI, nothing else: `.dockerignore` keeps out `.env`, tests, eval and docs. `docker-compose.yml` passes `ANTHROPIC_API_KEY` from the shell or `.env` when the container starts, so no key is ever written into a layer. With no key the app falls back to the offline stub, so `docker compose up` works on a fresh machine.
