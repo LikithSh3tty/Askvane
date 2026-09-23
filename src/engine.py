@@ -26,7 +26,7 @@ class Requirement:
     rephrase: bool = False
 
 
-def _param_required(spec: ParamSpec, slot: SlotState) -> bool:
+def param_required(spec: ParamSpec, slot: SlotState) -> bool:
     if spec.required:
         return True
     if spec.required_if:
@@ -38,24 +38,30 @@ def _param_required(spec: ParamSpec, slot: SlotState) -> bool:
 
 
 def requirements(state: WorkflowState, catalog: Catalog | None = None,
-                 include_optional: bool = False) -> list[Requirement]:
-    """Unset requirements in question order: slot order, then declaration order."""
+                 include_optional: bool = False, include_filled: bool = False) -> list[Requirement]:
+    """Unset requirements in question order: slot order, then declaration order.
+
+    `include_optional` adds optional params of chosen nodes (accepted if volunteered).
+    `include_filled` adds requirements that already hold a value, so a correction
+    ("actually, use email instead") can overwrite them.
+    """
     catalog = catalog or get_catalog()
     out: list[Requirement] = []
     for slot_spec in catalog.slots:
         slot = state.slots[slot_spec.id]
         node_type = state.node_type(slot_spec.id, catalog)
-        if node_type is None:
+        if node_type is None or (include_filled and slot_spec.choose):
             out.append(Requirement(
                 id=slot_spec.id, slot=slot_spec.id, param=None,
                 hint=slot_spec.prompt_hint or slot_spec.display,
                 options=tuple(catalog.choices(slot_spec.id)),
             ))
-            continue   # this slot's params do not exist until its node is chosen
+            if node_type is None:
+                continue   # this slot's params do not exist until its node is chosen
         for name, spec in catalog.nodes[node_type].params.items():
-            if name in slot.params:
+            if name in slot.params and not include_filled:
                 continue
-            required = _param_required(spec, slot)
+            required = param_required(spec, slot)
             # Optional params are never asked about, only accepted if volunteered.
             # A conditional param whose condition is unmet does not exist yet.
             if not required and (not include_optional or spec.required_if):
