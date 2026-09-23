@@ -20,6 +20,7 @@ class Requirement:
     slot: str
     param: str | None             # None when the requirement is choosing the slot's node
     hint: str
+    node: str | None = None       # node type the param belongs to
     options: tuple = ()           # allowed values, when the answer is a closed set
     required: bool = True
     rephrase: bool = False
@@ -60,7 +61,7 @@ def requirements(state: WorkflowState, catalog: Catalog | None = None,
             if not required and (not include_optional or spec.required_if):
                 continue
             out.append(Requirement(
-                id=f"{slot_spec.id}.{name}", slot=slot_spec.id, param=name,
+                id=f"{slot_spec.id}.{name}", slot=slot_spec.id, param=name, node=node_type,
                 hint=spec.prompt_hint or name.replace("_", " "),
                 options=tuple(spec.enum or ()), required=required,
             ))
