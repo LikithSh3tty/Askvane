@@ -1,0 +1,13 @@
+# environment and secrets
+.env
+.venv/
+venv/
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# assignment material, kept local only
+Digitomics_Assignment.pdf
+clarification_agent_spec.md
