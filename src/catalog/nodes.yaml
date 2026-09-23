@@ -1,0 +1,187 @@
+# Node catalog: the schema the whole agent reasons over.
+#
+# `slots` is the shape of a workflow, in the order a request flows through it.
+# A slot either lets the user choose a node of some kind (`choose`) or always
+# holds one fixed node (`node`). Slot order is question order.
+#
+# `nodes` declares every node type. A param is required when `required: true`,
+# or when `required_if` names a sibling param whose current value is listed.
+# `aliases` map enum members (or selectable nodes) to the words a user might say;
+# the grounding guard uses them to check a value against the text it came from.
+
+slots:
+  - id: trigger
+    choose: trigger
+    display: Trigger Source
+    prompt_hint: which platform or event starts the workflow
+  - id: filter
+    node: condition
+    display: Condition
+  - id: action
+    choose: action
+    display: Notification Channel
+    prompt_hint: where the notification or result should be sent
+  - id: dedupe
+    node: deduplicate
+    display: Duplicate Handling
+
+nodes:
+  # ---------------------------------------------------------------- triggers
+  gmail_trigger:
+    kind: trigger
+    label: Gmail Trigger
+    display: Gmail
+    aliases: [gmail, google mail, email, e-mail, mail]
+    params:
+      monitor_location:
+        required: true
+        display_suffix: (Label)
+        prompt_hint: which Gmail label or folder to monitor
+      only_unread: { required: false, default: true, enum: [true, false] }
+
+  outlook_trigger:
+    kind: trigger
+    label: Outlook Trigger
+    display: Outlook
+    aliases: [outlook, office 365, microsoft mail, hotmail, email, e-mail, mail]
+    params:
+      monitor_location:
+        required: true
+        display_suffix: (Folder)
+        prompt_hint: which Outlook folder to monitor
+      only_unread: { required: false, default: true, enum: [true, false] }
+
+  webhook_trigger:
+    kind: trigger
+    label: Webhook Trigger
+    display: Webhook
+    aliases: [webhook, web hook, http call, api call, incoming request]
+    params:
+      path: { required: true, prompt_hint: which URL path the webhook should listen on }
+      method:
+        required: false
+        default: POST
+        enum: [POST, GET]
+        aliases: { POST: [post], GET: [get] }
+
+  schedule_trigger:
+    kind: trigger
+    label: Schedule Trigger
+    display: Schedule
+    aliases: [schedule, scheduled, every hour, hourly, every day, daily, every morning, every week, weekly, cron]
+    params:
+      frequency:
+        required: true
+        enum: [hourly, daily, weekly]
+        aliases:
+          hourly: [hourly, every hour]
+          daily: [daily, every day, every morning, every evening]
+          weekly: [weekly, every week, every monday, every tuesday, every wednesday, every thursday, every friday, every saturday, every sunday]
+        prompt_hint: how often the workflow should run (hourly, daily or weekly)
+      time:
+        required_if: { frequency: [daily, weekly] }
+        prompt_hint: what time of day it should run
+      day_of_week:
+        required_if: { frequency: [weekly] }
+        enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+        aliases:
+          monday: [monday, mon]
+          tuesday: [tuesday, tue]
+          wednesday: [wednesday, wed]
+          thursday: [thursday, thu]
+          friday: [friday, fri]
+          saturday: [saturday, sat]
+          sunday: [sunday, sun]
+        prompt_hint: which day of the week it should run
+
+  # ----------------------------------------------------------------- actions
+  slack_notify:
+    kind: action
+    label: Slack Notification
+    display: Slack
+    aliases: [slack]
+    params:
+      channel: { required: true, prompt_hint: "which Slack channel to post in (and workspace, if there is more than one)" }
+      workspace: { required: false }
+      message: { required: false }
+
+  email_send:
+    kind: action
+    label: Email Notification
+    display: Email
+    aliases: [email, e-mail, mail, send an email, email me]
+    params:
+      recipient: { required: true, prompt_hint: which email address should receive it }
+      subject: { required: false }
+
+  http_request:
+    kind: action
+    label: HTTP Request
+    display: HTTP Request
+    aliases: [http request, webhook call, api, post request, call an api, call the api]
+    params:
+      url: { required: true, prompt_hint: which URL to send the request to }
+      method:
+        required: true
+        enum: [GET, POST, PUT]
+        aliases: { GET: [get], POST: [post], PUT: [put] }
+        prompt_hint: which HTTP method to use (GET, POST or PUT)
+
+  extract_fields:
+    kind: action
+    label: Extract Fields
+    selectable: false
+    params:
+      fields: { required: false }
+
+  # ------------------------------------------------------------------- logic
+  filter_by_label:
+    kind: logic
+    label: Filter by Label
+    selectable: false
+    params:
+      label: { required: true }
+
+  condition:
+    kind: logic
+    label: Condition
+    params:
+      mode:
+        required: true
+        enum: [all, filtered]
+        aliases:
+          all: [every, all, any, each, everything, no filter]
+          filtered: [only, above, below, over, under, more than, less than, greater than, contains, containing, from]
+        prompt_hint: whether every item should trigger the workflow, or only items matching a condition
+      field:
+        required_if: { mode: [filtered] }
+        enum: [amount, subject, sender]
+        aliases:
+          amount: [amount, total, value, price, ₹, $, €, £, rs, inr, usd]
+          subject: [subject, title]
+          sender: [sender, from]
+        prompt_hint: which field the condition checks (amount, subject or sender)
+      operator:
+        required_if: { mode: [filtered] }
+        enum: [gt, lt, eq, contains]
+        aliases:
+          gt: [above, over, more than, greater than, exceeding, higher than, ">"]
+          lt: [below, under, less than, lower than, "<"]
+          eq: [equal to, equals, exactly, is]
+          contains: [contains, containing, includes, including, mentions, from]
+        prompt_hint: how the value should be compared
+      value:
+        required_if: { mode: [filtered] }
+        prompt_hint: which value to compare against
+
+  deduplicate:
+    kind: logic
+    label: Duplicate Handling
+    params:
+      enabled:
+        required: true
+        enum: [true, false]
+        aliases:
+          true: ["yes", yeah, yep, sure, ignore, ignore them, skip duplicates, ignore duplicates]
+          false: ["no", nope, keep them, don't ignore, do not ignore, keep duplicates]
+        prompt_hint: whether duplicate items should be ignored
