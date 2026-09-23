@@ -34,6 +34,7 @@ class StubLLM(LLM):
         self.extractions = {normalize(k): v for k, v in data["extraction"].items()}
         self.questions = data["question"]
         self.ambiguity_template = data["ambiguity_template"]
+        self.subjects = data["subjects"]
 
     def complete_json(self, system: str, user: str, schema: dict) -> dict:
         payload = json.loads(user)
@@ -62,4 +63,22 @@ class StubLLM(LLM):
         entry = self.questions.get(f"{req}:{payload.get('node')}") or self.questions.get(req)
         if entry is None:
             raise StubMiss(f"no scripted question for requirement {req!r}")
-        return {"question": entry["rephrase" if payload.get("rephrase") else "ask"]}
+        if payload.get("rephrase"):
+            return {"question": entry["rephrase"]}
+        subject = self._subject(payload.get("conversation", []))
+        if subject is None and "ask_generic" in entry:
+            return {"question": entry["ask_generic"]}
+        item, items = subject or ("item", "items")
+        return {"question": entry["ask"].format(item=item, items=items)}
+
+    def _subject(self, conversation: list[str]) -> tuple[str, str] | None:
+        """The first thing the user named that the workflow is about, singular and plural."""
+        for line in conversation:
+            if not line.startswith("user: "):
+                continue
+            words = re.findall(r"[a-z]+", line.lower())
+            for word in words:
+                for singular, plural in self.subjects.items():
+                    if word in (singular, plural):
+                        return singular, plural
+        return None

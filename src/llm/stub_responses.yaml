@@ -7,7 +7,18 @@
 # guard are what keep those out of the state.
 #
 # `question` maps a requirement id (optionally `id:node_type`) to a first ask and
-# a rephrase for when the plain ask has already failed twice.
+# a rephrase for when the plain ask has already failed twice. `{item}` and
+# `{items}` in an ask are filled with what the user said the workflow is about,
+# taken from `subjects`; when they named none of those, `ask_generic` is used.
+
+subjects:
+  invoice: invoices
+  receipt: receipts
+  order: orders
+  message: messages
+  ticket: tickets
+  lead: leads
+  submission: submissions
 
 ambiguity_template: 'When you say "{span}", do you mean {options}?'
 
@@ -304,7 +315,8 @@ extraction:
 
 question:
   trigger:
-    ask: Which platform receives the invoice?
+    ask: Which platform receives the {item}?
+    ask_generic: What should start this workflow?
     rephrase: "I need to know what starts this workflow. Please pick one: Gmail, Outlook, a webhook, or a schedule."
   trigger.monitor_location:gmail_trigger:
     ask: Which Gmail label or folder should I monitor?
@@ -325,7 +337,8 @@ question:
     ask: Which day of the week should it run?
     rephrase: "Please name a day, Monday to Sunday."
   filter.mode:
-    ask: Should every invoice trigger the workflow, or only invoices above a certain amount?
+    ask: Should every {item} trigger the workflow, or only {items} above a certain amount?
+    ask_generic: Should the workflow run every time, or only when a condition is met, such as an amount above a limit?
     rephrase: "Should I act on every item, or only on items that match a condition (for example, an amount above a limit)?"
   filter.field:
     ask: Which field should the condition check?
@@ -352,5 +365,6 @@ question:
     ask: Which HTTP method should the request use?
     rephrase: "Please pick one: GET, POST, or PUT."
   dedupe.enabled:
-    ask: Should duplicate invoices be ignored?
+    ask: Should duplicate {items} be ignored?
+    ask_generic: Should duplicates be ignored?
     rephrase: "If the same item arrives twice, should I skip the second one? Yes or no."

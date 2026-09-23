@@ -49,6 +49,29 @@ def test_rephrase_differs_from_first_ask(stub):
     assert ask != again
 
 
+def ask(stub, req, conversation):
+    payload = {"requirement": req, "conversation": conversation}
+    return stub.complete_json("s", json.dumps(payload), QUESTION)["question"]
+
+
+def test_question_uses_what_the_user_said_the_workflow_is_about(stub):
+    orders = ["user: When our webhook at /orders receives a call, forward it"]
+    assert ask(stub, "dedupe.enabled", orders) == "Should duplicate orders be ignored?"
+    assert "every order" in ask(stub, "filter.mode", orders)
+
+
+def test_question_without_a_named_subject_is_generic(stub):
+    schedule = ["user: Every day at 9am, post a summary to Slack in #daily"]
+    for req in ("trigger", "filter.mode", "dedupe.enabled"):
+        assert "invoice" not in ask(stub, req, schedule)
+    assert ask(stub, "dedupe.enabled", schedule) == "Should duplicates be ignored?"
+
+
+def test_agent_turns_do_not_set_the_subject(stub):
+    assert ask(stub, "trigger", ["agent: Which platform receives the invoice?"]) == \
+        "What should start this workflow?"
+
+
 def test_unknown_utterance_raises(stub):
     with pytest.raises(StubMiss):
         extract(stub, "Post every new tweet to Discord and also order pizza")

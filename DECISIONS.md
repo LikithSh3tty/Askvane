@@ -70,6 +70,10 @@ Requests carry `fallbacks: "default"` so that if a safety classifier declines a 
 
 The LLM interface is one method taking a system prompt, a user message and a schema. The stub needs to know whether it is being asked to extract or to phrase, so every schema carries a `title` ("extraction" or "question"). Real providers strip it before sending.
 
+## The stub words questions around what the user named
+
+The real phraser is told to use the user's own words, so the stub does the same deterministically: it takes the first subject the user named from a short list in `stub_responses.yaml` (invoices, orders, messages, …) and fills it into the question. When the user named none, as with a daily summary on a schedule, it asks a generic version rather than talking about invoices nobody mentioned.
+
 ## Grounding checks the value against its span, not only the span against the message
 
 A span check alone is not enough: a model can quote real text ("finance team") and claim a value it does not contain ("#finance"). So the guard also requires that the span actually says the value. For a closed set, the span must contain one of that option's aliases from the catalog (so "Yes" cannot ground `false`, and "notify" cannot ground Slack). For free text, the value must appear verbatim in the span, prefix included. Numbers are compared digit for digit after removing thousands separators, so "₹10,000" grounds 10000 and nothing else.
