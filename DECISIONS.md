@@ -9,3 +9,19 @@ Sessions are a plain dict keyed by session id inside the API process. The assign
 ## httpx is a dependency
 
 FastAPI's `TestClient` is built on httpx, so the API tests need it. It is a test dependency only; the running app never makes an HTTP call.
+
+## Question order follows the data flow of the workflow
+
+The build spec lists the priority as trigger, trigger params, action, action params, then logic. The assignment's own reference conversation asks about the amount condition before it asks where to send the notification, so that order would make the reference conversation impossible to reproduce. The catalog therefore declares `slots` (trigger, filter, action, dedupe) in the order data moves through the workflow, and questions follow slot order, then catalog declaration order within a slot.
+
+## Slack workspace is optional
+
+The reference conversation asks "Which Slack workspace and channel?", the user answers only "#finance channel", and the agent treats that as complete. Requiring `workspace` would force a question the reference never asks. A Slack credential is installed per workspace, so the workspace is known from the connection; it stays in the catalog as an optional param and is recorded if the user volunteers it.
+
+## Optional params are accepted, never asked
+
+The reference ends as soon as the mandatory items are known, and shows "Additional Preferences: -". Optional params (Slack message, email subject) are offered to the extractor so a volunteered value is kept, but the engine never spends a question on them.
+
+## Edges are derived, not stored
+
+State holds the chosen nodes and their values. Edges follow from which slots are filled (a condition exists only when the user asked for one), so the generator derives them. Storing them as well would create a second copy that could disagree with the first.
