@@ -1,0 +1,420 @@
+# Scripted conversations for the accuracy harness.
+#
+# Written before any prompt was tuned. Each conversation is the user's side
+# only, in the order the agent is expected to ask. `expected` is every value
+# that should be filled at the end, keyed by requirement id; `complete` says
+# whether a workflow should be produced; `declined` says whether the agent
+# should have refused something the catalog cannot express.
+
+- id: c01_reference
+  category: straightforward
+  turns:
+    - Whenever a new invoice arrives, notify my finance team.
+    - Gmail
+    - Finance
+    - Only above ₹10,000
+    - Slack
+    - "#finance channel"
+    - "Yes"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: filtered
+    filter.field: amount
+    filter.operator: gt
+    filter.value: 10000
+    action: slack_notify
+    action.channel: "#finance"
+    dedupe.enabled: true
+
+- id: c02_outlook_to_email
+  category: straightforward
+  turns:
+    - When a new message lands in my Outlook Invoices folder, email ap@acme.com
+    - Every one of them
+    - "No"
+  complete: true
+  expected:
+    trigger: outlook_trigger
+    trigger.monitor_location: Invoices
+    filter.mode: all
+    action: email_send
+    action.recipient: ap@acme.com
+    dedupe.enabled: false
+
+- id: c03_webhook_to_http
+  category: straightforward
+  turns:
+    - When our webhook at /orders receives a call, forward it with a POST request to https://erp.example.com/api
+    - all of them
+    - "yes"
+  complete: true
+  expected:
+    trigger: webhook_trigger
+    trigger.path: /orders
+    filter.mode: all
+    action: http_request
+    action.url: https://erp.example.com/api
+    action.method: POST
+    dedupe.enabled: true
+
+- id: c04_daily_schedule_to_slack
+  category: straightforward
+  turns:
+    - Every day at 9am, post a summary to Slack in #daily
+    - every time, no filter
+    - "no"
+  complete: true
+  expected:
+    trigger: schedule_trigger
+    trigger.frequency: daily
+    trigger.time: 9am
+    filter.mode: all
+    action: slack_notify
+    action.channel: "#daily"
+    dedupe.enabled: false
+
+- id: c05_weekly_schedule_needs_a_day
+  category: conditional-requirements
+  turns:
+    - Run weekly and email reports@acme.com
+    - "09:00"
+    - Monday
+    - every item
+    - "yes"
+  complete: true
+  expected:
+    trigger: schedule_trigger
+    trigger.frequency: weekly
+    trigger.time: "09:00"
+    trigger.day_of_week: monday
+    filter.mode: all
+    action: email_send
+    action.recipient: reports@acme.com
+    dedupe.enabled: true
+
+- id: c06_one_answer_fills_two
+  category: multi-answer
+  turns:
+    - When an invoice arrives in Gmail, alert Slack
+    - Label Finance, and only above ₹5,000
+    - "#ap-alerts"
+    - "yes"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: filtered
+    filter.field: amount
+    filter.operator: gt
+    filter.value: 5000
+    action: slack_notify
+    action.channel: "#ap-alerts"
+    dedupe.enabled: true
+
+- id: c07_channel_before_asked
+  category: early-answer
+  turns:
+    - "Gmail invoices should go to Slack channel #finance"
+    - Finance
+    - every invoice
+    - "yes"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: all
+    action: slack_notify
+    action.channel: "#finance"
+    dedupe.enabled: true
+
+- id: c08_duplicates_before_asked
+  category: early-answer
+  turns:
+    - Watch my Gmail Receipts label
+    - Only above $200, and ignore duplicates
+    - Email me at me@home.org
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Receipts
+    filter.mode: filtered
+    filter.field: amount
+    filter.operator: gt
+    filter.value: 200
+    action: email_send
+    action.recipient: me@home.org
+    dedupe.enabled: true
+
+- id: c09_everything_up_front
+  category: all-in-first-message
+  turns:
+    - "When a Gmail email with label Invoices arrives and the amount is above ₹10,000, post to Slack #finance and ignore duplicates"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Invoices
+    filter.mode: filtered
+    filter.field: amount
+    filter.operator: gt
+    filter.value: 10000
+    action: slack_notify
+    action.channel: "#finance"
+    dedupe.enabled: true
+
+- id: c10_everything_up_front_webhook
+  category: all-in-first-message
+  turns:
+    - Whenever our /signup webhook fires, email growth@acme.com for every signup, and keep duplicates
+  complete: true
+  expected:
+    trigger: webhook_trigger
+    trigger.path: /signup
+    filter.mode: all
+    action: email_send
+    action.recipient: growth@acme.com
+    dedupe.enabled: false
+
+- id: c11_email_could_be_gmail_or_outlook
+  category: ambiguous
+  turns:
+    - When I get an email with an invoice, post it to Slack
+    - Outlook
+    - Invoices
+    - all of them
+    - "#billing"
+    - "no"
+  complete: true
+  expected:
+    trigger: outlook_trigger
+    trigger.monitor_location: Invoices
+    filter.mode: all
+    action: slack_notify
+    action.channel: "#billing"
+    dedupe.enabled: false
+
+- id: c12_shared_word_resolved_by_question
+  category: ambiguous
+  turns:
+    - Gmail to Slack please
+    - The Finance one
+    - every one
+    - "#finance channel"
+    - "Yes"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: all
+    action: slack_notify
+    action.channel: "#finance"
+    dedupe.enabled: true
+
+- id: c13_every_and_above_in_one_breath
+  category: ambiguous
+  turns:
+    - "Gmail Finance label to Slack #finance"
+    - every invoice above 500
+    - Only the ones above 500
+    - amount
+    - "yes"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: filtered
+    filter.field: amount
+    filter.operator: gt
+    filter.value: 500
+    action: slack_notify
+    action.channel: "#finance"
+    dedupe.enabled: true
+
+- id: c14_switch_slack_to_email
+  category: change-of-mind
+  turns:
+    - When a new invoice arrives in Gmail, notify Slack
+    - Finance
+    - every invoice
+    - Actually, send an email instead
+    - ap@acme.com
+    - "yes"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: all
+    action: email_send
+    action.recipient: ap@acme.com
+    dedupe.enabled: true
+
+- id: c15_switch_gmail_to_outlook
+  category: change-of-mind
+  turns:
+    - "Watch Gmail and message Slack #ops"
+    - Actually make it Outlook
+    - Alerts
+    - all
+    - "no"
+  complete: true
+  expected:
+    trigger: outlook_trigger
+    trigger.monitor_location: Alerts
+    filter.mode: all
+    action: slack_notify
+    action.channel: "#ops"
+    dedupe.enabled: false
+
+- id: c16_raise_the_threshold
+  category: change-of-mind
+  turns:
+    - "Gmail Finance label to Slack #finance, ignore duplicates"
+    - Only above ₹10,000
+    - Actually change it to above ₹50,000
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: filtered
+    filter.field: amount
+    filter.operator: gt
+    filter.value: 50000
+    action: slack_notify
+    action.channel: "#finance"
+    dedupe.enabled: true
+
+- id: c17_discord_is_not_supported
+  category: unsupported
+  turns:
+    - When a new invoice arrives in Gmail, post it to Discord
+  complete: false
+  declined: true
+  expected:
+    trigger: gmail_trigger
+
+- id: c18_typeform_then_webhook
+  category: unsupported
+  turns:
+    - Send new Typeform responses to Slack
+    - Use a webhook then, at /typeform
+    - all
+    - "#leads"
+    - "yes"
+  complete: true
+  declined: true
+  expected:
+    trigger: webhook_trigger
+    trigger.path: /typeform
+    filter.mode: all
+    action: slack_notify
+    action.channel: "#leads"
+    dedupe.enabled: true
+
+- id: c19_twitter_and_whatsapp
+  category: unsupported
+  turns:
+    - When someone tweets about us, text me on WhatsApp
+  complete: false
+  declined: true
+  expected: {}
+
+- id: c20_notify_the_finance_team
+  category: hallucination-trap
+  turns:
+    - Notify the finance team about new invoices
+    - Gmail
+    - Finance
+    - every invoice
+    - Slack
+    - "#finance channel"
+    - "Yes"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: all
+    action: slack_notify
+    action.channel: "#finance"
+    dedupe.enabled: true
+
+- id: c21_no_answer_twice_then_rephrase
+  category: non-answer
+  turns:
+    - Set up an automation for invoices
+    - I'm not sure
+    - hmm, whatever you think
+    - Gmail
+    - Finance
+    - every invoice
+    - Slack
+    - "#finance channel"
+    - "Yes"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Finance
+    filter.mode: all
+    action: slack_notify
+    action.channel: "#finance"
+    dedupe.enabled: true
+
+- id: c22_user_stops_early
+  category: incomplete
+  turns:
+    - Send Slack alerts for new Gmail messages
+  complete: false
+  expected:
+    trigger: gmail_trigger
+    action: slack_notify
+
+- id: c23_http_method_asked_after_condition
+  category: straightforward
+  turns:
+    - When a new email hits my Gmail Orders label, call the API at https://api.acme.com/orders
+    - every order
+    - POST
+    - "no"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Orders
+    filter.mode: all
+    action: http_request
+    action.url: https://api.acme.com/orders
+    action.method: POST
+    dedupe.enabled: false
+
+- id: c24_below_threshold
+  category: multi-answer
+  turns:
+    - Outlook Expenses folder to email finance@acme.com when amount is below $100
+    - "yes"
+  complete: true
+  expected:
+    trigger: outlook_trigger
+    trigger.monitor_location: Expenses
+    filter.mode: filtered
+    filter.field: amount
+    filter.operator: lt
+    filter.value: 100
+    action: email_send
+    action.recipient: finance@acme.com
+    dedupe.enabled: true
+
+- id: c25_subject_contains
+  category: multi-answer
+  turns:
+    - "Gmail Support label, only emails whose subject contains urgent, to Slack #support"
+    - "no"
+  complete: true
+  expected:
+    trigger: gmail_trigger
+    trigger.monitor_location: Support
+    filter.mode: filtered
+    filter.field: subject
+    filter.operator: contains
+    filter.value: urgent
+    action: slack_notify
+    action.channel: "#support"
+    dedupe.enabled: false
