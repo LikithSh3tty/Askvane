@@ -8,14 +8,15 @@ deterministic code.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from src import ambiguity
 from src.catalog.loader import Catalog, get_catalog
-from src.engine import Requirement, is_complete, next_question, requirements
+from src.engine import (REPHRASE_AFTER, Requirement, is_complete, next_question,
+                        open_requirements, requirements)
 from src.extractor import Extraction, extract
 from src.generator import generate, state_table
-from src.grounding import Grounded, coerce_option, ground, mentions, option_aliases
+from src.grounding import Grounded, as_number, coerce_option, ground, mentions, option_aliases
 from src.llm.base import LLM
 from src.phraser import option_name, phrase
 from src.state import Turn, WorkflowState
@@ -41,7 +42,11 @@ def _unguarded(extractions: list[Extraction], offered: list[Requirement]) -> lis
     out = []
     for ex in extractions:
         req = by_id[ex.requirement]
-        value = coerce_option(ex.value, req.options) if req.options else ex.value
+        if req.options:
+            value = coerce_option(ex.value, req.options)
+        else:
+            number = as_number(ex.value)
+            value = ex.value if number is None else number
         if value is not None:
             out.append(Grounded(ex.requirement, value, ex.span))
     return out
@@ -75,6 +80,7 @@ def handle_turn(state: WorkflowState, utterance: str, llm: LLM, catalog: Catalog
     seen: set[str] = set()
     ambiguous: list[ambiguity.Ambiguity] = []
     declines: list[str] = []
+    declined_reqs: list[str] = []
     rejected: list[dict] = []
 
     for _ in range(MAX_PASSES):
@@ -95,6 +101,7 @@ def handle_turn(state: WorkflowState, utterance: str, llm: LLM, catalog: Catalog
         for item in result.unsupported:
             if _is_really_unsupported(item, utterance, fresh, catalog):
                 declines.append(_decline(item, fresh, catalog))
+                declined_reqs.append(item.requirement)
                 state.declined.append(item.span)
         offered = requirements(state, catalog, include_optional=True)
     state.rejections += rejected
@@ -112,6 +119,10 @@ def handle_turn(state: WorkflowState, utterance: str, llm: LLM, catalog: Catalog
         state.last_asked = None
     else:
         req = next_question(state, catalog)
+        # After refusing something, ask again about the thing refused, not whatever is next.
+        still_open = [r for r in open_requirements(state, catalog) if r.id in declined_reqs]
+        if still_open:
+            req = replace(still_open[0], rephrase=state.asked.get(still_open[0].id, 0) >= REPHRASE_AFTER)
         reply = "".join(declines) + phrase(llm, req, state, catalog)
         state.mark_asked(req.id)
 
