@@ -71,15 +71,23 @@ def coerce_option(value: str, options: tuple) -> Any:
     return None
 
 
+def as_number(value: str) -> int | float | None:
+    """"10,000" -> 10000; anything that is not a plain number -> None."""
+    digits = value.replace(",", "").strip()
+    if not NUMBER.match(digits):
+        return None
+    number = float(digits)
+    return int(number) if number.is_integer() else number
+
+
 def _free_text_said(value: str, span: str) -> Any:
     """Return the typed value if the span says it, else None."""
-    if NUMBER.match(value.replace(",", "")):
-        digits = value.replace(",", "")
+    number = as_number(value)
+    if number is not None:
+        digits = value.replace(",", "").strip()
         span_digits = re.sub(r"(?<=\d)[,\s](?=\d)", "", span)
-        if re.search(rf"(?<![\d.]){re.escape(digits)}(?![\d.])", span_digits):
-            number = float(digits)
-            return int(number) if number.is_integer() else number
-        return None
+        found = re.search(rf"(?<![\d.]){re.escape(digits)}(?![\d.])", span_digits)
+        return number if found else None
     # Verbatim, prefix included: "#finance" is not said by "finance team".
     value = value.strip()
     return value if value and squash(value) in squash(span) else None
