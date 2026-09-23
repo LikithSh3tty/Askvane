@@ -106,12 +106,44 @@ def run_conversation(conv: dict, llm, catalog, guard: bool) -> dict:
     }
 
 
+README = ROOT / "README.md"
+BLOCK = re.compile(r"(<!-- eval:start -->\n).*?(<!-- eval:end -->)", re.S)
+
+
+def write_readme_block() -> None:
+    """Fill the README's results block from the committed result files."""
+    rows = []
+    for path, label in ((RESULTS, "Grounding on"), (ROOT / "eval" / "results_no_grounding.json", "Grounding off (ablation)")):
+        if path.exists():
+            r = json.loads(path.read_text(encoding="utf-8"))
+            o = r["outcomes"]
+            rows.append(f"| {label} | {r['provider']} | {r['conversations']} | {o['exact']} | "
+                        f"{o['complete_different']} | {o['incomplete']} | {o['assumed']} | {r['guard_rejections']} |")
+    main_run = json.loads(RESULTS.read_text(encoding="utf-8"))
+    turns = ", ".join(f"{k} turn{'s' if k != '1' else ''}: {v}" for k, v in main_run["turns_to_complete"].items())
+    block = "\n".join([
+        "| Run | Provider | Conversations | exact | complete_different | incomplete | assumed | Guard rejections |",
+        "|---|---|---|---|---|---|---|---|",
+        *rows,
+        "",
+        f"Turns to reach a complete workflow (grounding on): {turns}.",
+        "",
+    ])
+    text = README.read_text(encoding="utf-8")
+    README.write_text(BLOCK.sub(lambda m: m.group(1) + block + m.group(2), text), encoding="utf-8", newline="\n")
+
+
 def main(argv: list[str] | None = None) -> dict:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--provider", default="stub", choices=["stub", "anthropic"])
     parser.add_argument("--no-grounding", action="store_true", help="ablation: accept every extraction")
     parser.add_argument("--out", default=str(RESULTS))
+    parser.add_argument("--readme", action="store_true",
+                        help="rewrite the results block in README.md from eval/results*.json and exit")
     args = parser.parse_args(argv)
+    if args.readme:
+        write_readme_block()
+        return {}
 
     catalog = get_catalog()
     llm = make_llm(args.provider)
@@ -145,4 +177,4 @@ def main(argv: list[str] | None = None) -> dict:
 
 if __name__ == "__main__":
     report = main()
-    sys.exit(1 if report["outcomes"]["assumed"] and report["grounding"] else 0)
+    sys.exit(1 if report.get("grounding") and report["outcomes"]["assumed"] else 0)
