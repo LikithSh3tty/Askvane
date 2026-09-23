@@ -25,3 +25,15 @@ The reference ends as soon as the mandatory items are known, and shows "Addition
 ## Edges are derived, not stored
 
 State holds the chosen nodes and their values. Edges follow from which slots are filled (a condition exists only when the user asked for one), so the generator derives them. Storing them as well would create a second copy that could disagree with the first.
+
+## Structured outputs instead of a `{` prefill
+
+The build spec asked for the opening `{` to be prefilled. Current Claude models return a 400 for assistant prefill, so the provider passes the JSON schema through `output_config.format`. That constrains decoding to the schema, which is a stronger guarantee than a prefill ever gave. The model defaults to `claude-opus-5` and can be changed with `ANTHROPIC_MODEL`; effort is `low` because each call reads one short sentence.
+
+## Server-side refusal fallback on the Claude provider
+
+Requests carry `fallbacks: "default"` so that if a safety classifier declines a request, the API reruns it on its default fallback model inside the same call. For this domain a refusal is unlikely, and when one does get through, the provider raises instead of returning something empty.
+
+## The stub dispatches on the schema title
+
+The LLM interface is one method taking a system prompt, a user message and a schema. The stub needs to know whether it is being asked to extract or to phrase, so every schema carries a `title` ("extraction" or "question"). Real providers strip it before sending.
