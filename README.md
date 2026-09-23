@@ -139,7 +139,7 @@ python eval/run_eval.py --readme                    # refreshes the table below
 Turns to reach a complete workflow (grounding on): 1 turn: 2, 2 turns: 3, 3 turns: 4, 4 turns: 3, 5 turns: 5, 6 turns: 2, 7 turns: 2, 9 turns: 1.
 <!-- eval:end -->
 
-The ablation turns the grounding guard off and replays the same conversations. The `assumed` check in the harness does not reuse the guard's logic, so any hallucination that survives to the end of a conversation shows up there. Most of the 8 the guard rejects are later overwritten by what the user really says; the 2 that remain are a default label nobody chose and a notification channel read out of "text me".
+The ablation turns the grounding guard off and replays the same conversations. The `assumed` check in the harness does not reuse the guard's logic, so any hallucination that survives to the end of a conversation shows up there. Most of the 8 the guard rejects are later overwritten by what the user really says; the 2 conversations that still fail keep an "Inbox" label and a duplicate preference nobody stated, and an email action read out of "text me".
 
 ## Limitations
 
