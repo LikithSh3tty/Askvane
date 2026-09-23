@@ -62,7 +62,7 @@
 - id: c04_daily_schedule_to_slack
   category: straightforward
   turns:
-    - Every day at 9am, post a summary to Slack in #daily
+    - "Every day at 9am, post a summary to Slack in #daily"
     - every time, no filter
     - "no"
   complete: true
