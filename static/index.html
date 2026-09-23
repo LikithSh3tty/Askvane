@@ -109,7 +109,7 @@
   .sheet h2 { font-size: 17px; margin: 0; font-weight: 600; }
   .meter { margin: 10px 0 14px; display: flex; align-items: center; gap: 10px; color: var(--ink-soft); font-size: 13px; }
   .meter .track { flex: 1; height: 4px; background: var(--rule); border-radius: 4px; overflow: hidden; }
-  .meter .fill { height: 100%; width: 0; background: var(--cobalt); transition: width .5s ease; }
+  .meter .fill { height: 100%; width: 100%; transform: scaleX(0); transform-origin: left; background: var(--cobalt); transition: transform .5s ease; }
   .sheet.complete .meter .fill { background: var(--teal); }
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 10px 8px; vertical-align: top; border-top: 1px solid var(--rule); }
@@ -276,7 +276,7 @@ function renderTable(rows) {
   const known = ROWS.slice(0, 6).filter((p) => (values[p] ?? UNSET) !== UNSET).length;
   const complete = values.Status === "All information collected";
   $("sheet").classList.toggle("complete", complete);
-  $("fill").style.width = complete ? "100%" : `${Math.round((known / 6) * 100)}%`;
+  $("fill").style.transform = `scaleX(${complete ? 1 : known / 6})`;
   $("meter-text").textContent = complete ? "Complete" : (values.Status && values.Status !== UNSET ? values.Status : "Nothing yet");
 }
 
