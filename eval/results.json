@@ -1,0 +1,420 @@
+{
+  "provider": "stub",
+  "grounding": true,
+  "conversations": 25,
+  "outcomes": {
+    "exact": 25,
+    "complete_different": 0,
+    "incomplete": 0,
+    "assumed": 0
+  },
+  "turns_to_complete": {
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 3,
+    "5": 5,
+    "6": 2,
+    "7": 2,
+    "9": 1
+  },
+  "guard_rejections": 8,
+  "runs": [
+    {
+      "id": "c01_reference",
+      "category": "straightforward",
+      "outcome": "exact",
+      "turns": 7,
+      "completed_at_turn": 7,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 1,
+      "replies": [
+        "Which platform receives the invoice?",
+        "Which Gmail label or folder should I monitor?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Where should the notification be sent?",
+        "Which Slack workspace and channel?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c02_outlook_to_email",
+      "category": "straightforward",
+      "outcome": "exact",
+      "turns": 3,
+      "completed_at_turn": 3,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c03_webhook_to_http",
+      "category": "straightforward",
+      "outcome": "exact",
+      "turns": 3,
+      "completed_at_turn": 3,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c04_daily_schedule_to_slack",
+      "category": "straightforward",
+      "outcome": "exact",
+      "turns": 3,
+      "completed_at_turn": 3,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c05_weekly_schedule_needs_a_day",
+      "category": "conditional-requirements",
+      "outcome": "exact",
+      "turns": 5,
+      "completed_at_turn": 5,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "What time of day should it run?",
+        "Which day of the week should it run?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c06_one_answer_fills_two",
+      "category": "multi-answer",
+      "outcome": "exact",
+      "turns": 4,
+      "completed_at_turn": 4,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which Gmail label or folder should I monitor?",
+        "Which Slack workspace and channel?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c07_channel_before_asked",
+      "category": "early-answer",
+      "outcome": "exact",
+      "turns": 4,
+      "completed_at_turn": 4,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which Gmail label or folder should I monitor?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c08_duplicates_before_asked",
+      "category": "early-answer",
+      "outcome": "exact",
+      "turns": 3,
+      "completed_at_turn": 3,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Where should the notification be sent?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c09_everything_up_front",
+      "category": "all-in-first-message",
+      "outcome": "exact",
+      "turns": 1,
+      "completed_at_turn": 1,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c10_everything_up_front_webhook",
+      "category": "all-in-first-message",
+      "outcome": "exact",
+      "turns": 1,
+      "completed_at_turn": 1,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c11_email_could_be_gmail_or_outlook",
+      "category": "ambiguous",
+      "outcome": "exact",
+      "turns": 6,
+      "completed_at_turn": 6,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "When you say \"an email\", do you mean Gmail or Outlook?",
+        "Which Outlook folder should I monitor?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Which Slack workspace and channel?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c12_shared_word_resolved_by_question",
+      "category": "ambiguous",
+      "outcome": "exact",
+      "turns": 5,
+      "completed_at_turn": 5,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which Gmail label or folder should I monitor?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Which Slack workspace and channel?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c13_every_and_above_in_one_breath",
+      "category": "ambiguous",
+      "outcome": "exact",
+      "turns": 5,
+      "completed_at_turn": 5,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "When you say \"every invoice above\", do you mean all or filtered?",
+        "Which field should the condition check?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c14_switch_slack_to_email",
+      "category": "change-of-mind",
+      "outcome": "exact",
+      "turns": 6,
+      "completed_at_turn": 6,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which Gmail label or folder should I monitor?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Which Slack workspace and channel?",
+        "Which email address should receive the notification?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c15_switch_gmail_to_outlook",
+      "category": "change-of-mind",
+      "outcome": "exact",
+      "turns": 5,
+      "completed_at_turn": 5,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which Gmail label or folder should I monitor?",
+        "Which Outlook folder should I monitor?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c16_raise_the_threshold",
+      "category": "change-of-mind",
+      "outcome": "exact",
+      "turns": 3,
+      "completed_at_turn": 2,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "I have all the required information. Generating your workflow.",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c17_discord_is_not_supported",
+      "category": "unsupported",
+      "outcome": "exact",
+      "turns": 1,
+      "completed_at_turn": null,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "I can't build a workflow with Discord: it isn't one of the supported options (Slack, Email or HTTP Request). Where should the notification be sent?"
+      ]
+    },
+    {
+      "id": "c18_typeform_then_webhook",
+      "category": "unsupported",
+      "outcome": "exact",
+      "turns": 5,
+      "completed_at_turn": 5,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "I can't build a workflow with Typeform: it isn't one of the supported options (Gmail, Outlook, Webhook or Schedule). Which platform receives the invoice?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Which Slack workspace and channel?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c19_twitter_and_whatsapp",
+      "category": "unsupported",
+      "outcome": "exact",
+      "turns": 1,
+      "completed_at_turn": null,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 1,
+      "replies": [
+        "I can't build a workflow with tweets: it isn't one of the supported options (Gmail, Outlook, Webhook or Schedule). I can't build a workflow with WhatsApp: it isn't one of the supported options (Slack, Email or HTTP Request). Which platform receives the invoice?"
+      ]
+    },
+    {
+      "id": "c20_notify_the_finance_team",
+      "category": "hallucination-trap",
+      "outcome": "exact",
+      "turns": 7,
+      "completed_at_turn": 7,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 3,
+      "replies": [
+        "Which platform receives the invoice?",
+        "Which Gmail label or folder should I monitor?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Where should the notification be sent?",
+        "Which Slack workspace and channel?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c21_no_answer_twice_then_rephrase",
+      "category": "non-answer",
+      "outcome": "exact",
+      "turns": 9,
+      "completed_at_turn": 9,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 1,
+      "replies": [
+        "Which platform receives the invoice?",
+        "Which platform receives the invoice?",
+        "I need to know what starts this workflow. Please pick one: Gmail, Outlook, a webhook, or a schedule.",
+        "Which Gmail label or folder should I monitor?",
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Where should the notification be sent?",
+        "Which Slack workspace and channel?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c22_user_stops_early",
+      "category": "incomplete",
+      "outcome": "exact",
+      "turns": 1,
+      "completed_at_turn": null,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 2,
+      "replies": [
+        "Which Gmail label or folder should I monitor?"
+      ]
+    },
+    {
+      "id": "c23_http_method_asked_after_condition",
+      "category": "straightforward",
+      "outcome": "exact",
+      "turns": 4,
+      "completed_at_turn": 4,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should every invoice trigger the workflow, or only invoices above a certain amount?",
+        "Which HTTP method should the request use?",
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c24_below_threshold",
+      "category": "multi-answer",
+      "outcome": "exact",
+      "turns": 2,
+      "completed_at_turn": 2,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c25_subject_contains",
+      "category": "multi-answer",
+      "outcome": "exact",
+      "turns": 2,
+      "completed_at_turn": 2,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should duplicate invoices be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    }
+  ]
+}
