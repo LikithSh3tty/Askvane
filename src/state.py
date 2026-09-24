@@ -20,6 +20,18 @@ class SlotState(BaseModel):
     params: dict[str, Filled] = Field(default_factory=dict)
 
 
+class PendingAmbiguity(BaseModel):
+    """Words that named more than one option for a requirement not being asked about yet.
+
+    Like a value, it keeps the exact user text it came from and the turn it was said
+    on, so it can be checked against the transcript before it narrows a question.
+    """
+    requirement: str
+    span: str
+    options: list[Any]
+    turn: int
+
+
 class Turn(BaseModel):
     role: Literal["user", "agent"]
     text: str
@@ -33,6 +45,8 @@ class WorkflowState(BaseModel):
     transcript: list[Turn] = Field(default_factory=list)
     declined: list[str] = Field(default_factory=list)       # things the catalog cannot express
     rejections: list[dict] = Field(default_factory=list)    # grounding log, kept for inspection
+    # requirement id -> narrowed options waiting for that requirement to be asked
+    pending_ambiguities: dict[str, PendingAmbiguity] = Field(default_factory=dict)
 
     @classmethod
     def new(cls, session_id: str, catalog: Catalog) -> "WorkflowState":
