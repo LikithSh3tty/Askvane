@@ -136,6 +136,47 @@ def test_partial_state_table_shows_what_is_missing():
     assert table["Status"] == "4 items still needed"
 
 
+# -- state-table row labels ---------------------------------------------------
+
+BRIEF_ROWS = ["Trigger Source", "Monitor Location", "Condition", "Notification Channel",
+              "Channel / Recipient", "Duplicate Handling", "Additional Preferences", "Status"]
+
+
+def row_names(state, catalog=CATALOG):
+    return [r["parameter"] for r in state_table(state, catalog)]
+
+
+def test_reference_path_keeps_the_briefs_row_names_in_order(reference_run):
+    _, results = reference_run
+    assert row_names(new_state()) == BRIEF_ROWS
+    for r in results:
+        assert [row["parameter"] for row in r.state_table] == BRIEF_ROWS
+
+
+def jira_state():
+    return fill(new_state(), trigger="github_trigger", trigger__repository="acme/webapp", trigger__event="issue",
+                filter__mode="all", action="jira_create_issue", action__project="WEB",
+                action__issue_type="bug", dedupe__enabled=True)
+
+
+def test_jira_action_names_its_own_rows():
+    table = state_table(jira_state(), CATALOG)
+    assert [r["parameter"] for r in table] == [
+        "Trigger Source", "Repository / Repository Event", "Condition", "Issue Tracker",
+        "Project / Issue Type", "Duplicate Handling", "Additional Preferences", "Status"]
+    assert table[4]["value"] == "WEB, bug"
+
+
+def test_node_without_state_row_falls_back_to_the_briefs_names():
+    jira = CATALOG.nodes["jira_create_issue"]
+    bare = jira.model_copy(update={
+        "state_row": None,
+        "params": {k: v.model_copy(update={"state_row": None}) for k, v in jira.params.items()}})
+    catalog = CATALOG.model_copy(update={"nodes": {**CATALOG.nodes, "jira_create_issue": bare}})
+    names = row_names(jira_state(), catalog)
+    assert names[3:5] == ["Notification Channel", "Channel / Recipient"]
+
+
 # -- ambiguity ----------------------------------------------------------------
 
 def offered(state):
