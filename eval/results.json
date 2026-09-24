@@ -1,9 +1,9 @@
 {
   "provider": "stub",
   "grounding": true,
-  "conversations": 31,
+  "conversations": 34,
   "outcomes": {
-    "exact": 31,
+    "exact": 34,
     "complete_different": 0,
     "incomplete": 0,
     "assumed": 0
@@ -14,8 +14,9 @@
     "3": 5,
     "4": 5,
     "5": 7,
-    "6": 2,
+    "6": 3,
     "7": 3,
+    "8": 2,
     "9": 1
   },
   "guard_rejections": 8,
@@ -513,6 +514,64 @@
         "Should every message trigger the workflow, or only messages above a certain amount?",
         "Which Notion database should the new page go in?",
         "Should duplicate messages be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c32_first_answer_resolves_both",
+      "category": "ambiguous",
+      "outcome": "exact",
+      "turns": 6,
+      "completed_at_turn": 6,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "When you say \"form\", do you mean Google Forms or Typeform?",
+        "Which Google Form should I watch for new responses?",
+        "Should the workflow run every time, or only when a condition is met, such as an amount above a limit?",
+        "Which Google Sheets spreadsheet should I add the row to?",
+        "Should duplicates be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c33_change_of_mind_on_the_first_keeps_the_second",
+      "category": "ambiguous",
+      "outcome": "exact",
+      "turns": 8,
+      "completed_at_turn": 8,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "When you say \"form\", do you mean Google Forms or Typeform?",
+        "Which Google Form should I watch for new responses?",
+        "Which Typeform form should I watch for new responses?",
+        "Should every response trigger the workflow, or only responses above a certain amount?",
+        "When you say \"spreadsheet\", do you mean Google Sheets or Excel?",
+        "Which Google Sheets spreadsheet should I add the row to?",
+        "Should duplicate responses be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c34_answer_outside_the_narrowing_discards_it",
+      "category": "ambiguous",
+      "outcome": "exact",
+      "turns": 8,
+      "completed_at_turn": 8,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "When you say \"form\", do you mean Google Forms or Typeform?",
+        "Which Typeform form should I watch for new responses?",
+        "Should every response trigger the workflow, or only responses above a certain amount?",
+        "When you say \"spreadsheet\", do you mean Google Sheets or Excel?",
+        "Which Airtable base should the record go in?",
+        "Which table in that base?",
+        "Should duplicate responses be ignored?",
         "I have all the required information. Generating your workflow."
       ]
     }

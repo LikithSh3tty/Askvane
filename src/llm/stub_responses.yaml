@@ -392,6 +392,54 @@ extraction:
     extractions:
       - { requirement: action.database, value: Support inbox, span: Support inbox }
 
+  # ------------------------------------------------ two ambiguities in one message
+  "Put new form answers into a spreadsheet":
+    extractions:
+      - { requirement: trigger, value: google_forms_trigger, span: form }
+      - { requirement: action, value: google_sheets_append, span: spreadsheet }
+  "Google Forms, and Google Sheets for the spreadsheet":
+    extractions:
+      - { requirement: trigger, value: google_forms_trigger, span: Google Forms }
+      - { requirement: action, value: google_sheets_append, span: Google Sheets }
+  "Beta signups":
+    extractions:
+      - { requirement: trigger.form, value: Beta signups, span: Beta signups }
+  "Beta list":
+    extractions:
+      - { requirement: action.spreadsheet, value: Beta list, span: Beta list }
+  "Send form responses to a spreadsheet":
+    extractions:
+      - { requirement: trigger, value: google_forms_trigger, span: form }
+      - { requirement: action, value: google_sheets_append, span: spreadsheet }
+  "Google Forms":
+    extractions:
+      - { requirement: trigger, value: google_forms_trigger, span: Google Forms }
+  "Actually, make it Typeform":
+    extractions:
+      - { requirement: trigger, value: typeform_trigger, span: Typeform }
+  "Google Sheets":
+    extractions:
+      - { requirement: action, value: google_sheets_append, span: Google Sheets }
+  "Survey 2026":
+    extractions:
+      - { requirement: action.spreadsheet, value: Survey 2026, span: Survey 2026 }
+  "Save new form responses in a spreadsheet":
+    extractions:
+      - { requirement: trigger, value: google_forms_trigger, span: form }
+      - { requirement: action, value: google_sheets_append, span: spreadsheet }
+  "Feedback form":
+    extractions:
+      - { requirement: trigger.form, value: Feedback form, span: Feedback form }
+  "Neither, use Airtable":
+    extractions:
+      - { requirement: action, value: airtable_create_record, span: Airtable }
+  "CRM":
+    extractions:
+      - { requirement: action.base, value: CRM, span: CRM }
+  "Responses":
+    extractions:
+      - { requirement: action.table, value: Responses, span: Responses }
+
 question:
   trigger:
     ask: Which platform receives the {item}?

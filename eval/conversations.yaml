@@ -523,3 +523,64 @@
     action: notion_create_page
     action.database: Support inbox
     dedupe.enabled: false
+
+# ---------------------------------------------- a second ambiguity is parked, not lost
+
+- id: c32_first_answer_resolves_both
+  category: ambiguous
+  turns:
+    - Put new form answers into a spreadsheet
+    - Google Forms, and Google Sheets for the spreadsheet
+    - Beta signups
+    - all
+    - Beta list
+    - "No"
+  complete: true
+  expected:
+    trigger: google_forms_trigger
+    trigger.form: Beta signups
+    filter.mode: all
+    action: google_sheets_append
+    action.spreadsheet: Beta list
+    dedupe.enabled: false
+
+- id: c33_change_of_mind_on_the_first_keeps_the_second
+  category: ambiguous
+  turns:
+    - Send form responses to a spreadsheet
+    - Google Forms
+    - Actually, make it Typeform
+    - Customer survey
+    - all
+    - Google Sheets
+    - Survey 2026
+    - "Yes"
+  complete: true
+  expected:
+    trigger: typeform_trigger
+    trigger.form: Customer survey
+    filter.mode: all
+    action: google_sheets_append
+    action.spreadsheet: Survey 2026
+    dedupe.enabled: true
+
+- id: c34_answer_outside_the_narrowing_discards_it
+  category: ambiguous
+  turns:
+    - Save new form responses in a spreadsheet
+    - Typeform
+    - Feedback form
+    - all
+    - Neither, use Airtable
+    - CRM
+    - Responses
+    - "Yes"
+  complete: true
+  expected:
+    trigger: typeform_trigger
+    trigger.form: Feedback form
+    filter.mode: all
+    action: airtable_create_record
+    action.base: CRM
+    action.table: Responses
+    dedupe.enabled: true
