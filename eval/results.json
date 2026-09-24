@@ -461,7 +461,7 @@
         "When you say \"form\", do you mean Google Forms or Typeform?",
         "Which Typeform form should I watch for new responses?",
         "Should every response trigger the workflow, or only responses above a certain amount?",
-        "Where should the notification be sent?",
+        "When you say \"spreadsheet\", do you mean Google Sheets or Excel?",
         "Which Excel workbook should I add the row to?",
         "Should duplicate responses be ignored?",
         "I have all the required information. Generating your workflow."
