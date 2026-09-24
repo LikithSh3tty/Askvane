@@ -128,7 +128,7 @@ The generator used to name every row itself, so a Jira project appeared under "C
 
 ## A values row joins the labels of the params it shows
 
-The trigger and action values each share one row, and some nodes need two details (a Trello board and list, a Jira project and issue type). Adding rows would break the reference's fixed shape, so the row's label joins the distinct labels of the required params in declaration order: "Project / Issue Type". Because only currently required params count, a schedule reads "Frequency" until a daily frequency makes the run time required.
+The trigger and action values each share one row, and some nodes need two details (a Trello board and list, a Jira project and issue type). Adding rows would break the reference's fixed shape, so the row's label joins the distinct labels of the required params in declaration order: "Project / Issue Type". Because only currently required params count, a schedule reads "Frequency" until a daily frequency makes the run time required. The newer triggers dropped their value suffixes ("Leads 2026 (Spreadsheet)") once the label said the same thing; Gmail and Outlook keep "(Label)" and "(Folder)" because the reference shows "Finance (Label)".
 
 ## The UI matches table rows by position
 
