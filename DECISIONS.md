@@ -120,4 +120,16 @@ The image contains the app, the catalog and the UI, nothing else: `.dockerignore
 
 ## The catalog goes beyond the spec's eleven node types
 
-The spec named four triggers and three actions. The catalog now also covers Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub and RSS as triggers, and Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable and Asana as actions. No code changed to support them: each is a catalog entry, and its required details become questions the same way Gmail's label does. Where one word names two apps ("a spreadsheet" is Google Sheets or Excel, "a form" is Google Forms or Typeform), the aliases overlap on purpose so the ambiguity check asks. The unsupported-request conversations now use apps that are still outside the catalog (Mattermost, Jotform, Signal). The state table keeps the reference's row names, so "Notification Channel" also holds a spreadsheet or a Jira project.
+The spec named four triggers and three actions. The catalog now also covers Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub and RSS as triggers, and Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable and Asana as actions. No code changed to support them: each is a catalog entry, and its required details become questions the same way Gmail's label does. Where one word names two apps ("a spreadsheet" is Google Sheets or Excel, "a form" is Google Forms or Typeform), the aliases overlap on purpose so the ambiguity check asks. The unsupported-request conversations now use apps that are still outside the catalog (Mattermost, Jotform, Signal). State-table row labels now come from the catalog too (see below), so a Jira action no longer sits under "Notification Channel".
+
+## State-table row labels live in the catalog
+
+The generator used to name every row itself, so a Jira project appeared under "Channel / Recipient". What a row means depends on the node in it, and the catalog is where nodes are described, so each node declares the label of the row that names it and each required param the label of the row carrying its value. The reference path declares the brief's exact wording (Trigger Source, Monitor Location, Condition, Notification Channel, Channel / Recipient, Duplicate Handling), a test pins those eight names in the brief's order, and the order itself stays in the generator because it is the reference table's. A node without a label falls back to the slot's display name, or the brief's name for a values row, so the catalog can be labelled gradually.
+
+## A values row joins the labels of the params it shows
+
+The trigger and action values each share one row, and some nodes need two details (a Trello board and list, a Jira project and issue type). Adding rows would break the reference's fixed shape, so the row's label joins the distinct labels of the required params in declaration order: "Project / Issue Type". Because only currently required params count, a schedule reads "Frequency" until a daily frequency makes the run time required.
+
+## The UI matches table rows by position
+
+Row labels now change with the chosen apps, so the page can no longer look values up by label. The server always sends the same eight rows in the same order; the page renders them by position and keeps the brief's labels only as placeholders before the first reply.
