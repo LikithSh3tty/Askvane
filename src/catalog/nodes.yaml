@@ -116,7 +116,6 @@ nodes:
       spreadsheet:
         state_row: "Watched Spreadsheet"
         required: true
-        display_suffix: (Spreadsheet)
         prompt_hint: which Google Sheets spreadsheet to watch for new rows
       sheet: { required: false }
 
@@ -130,7 +129,6 @@ nodes:
       workbook:
         state_row: "Watched Workbook"
         required: true
-        display_suffix: (Workbook)
         prompt_hint: which Excel workbook to watch for new rows
       worksheet: { required: false }
 
@@ -144,7 +142,6 @@ nodes:
       form:
         state_row: "Form"
         required: true
-        display_suffix: (Form)
         prompt_hint: which Google Form to watch for new responses
 
   typeform_trigger:
@@ -157,7 +154,6 @@ nodes:
       form:
         state_row: "Form"
         required: true
-        display_suffix: (Form)
         prompt_hint: which Typeform form to watch for new responses
 
   telegram_trigger:
@@ -170,7 +166,6 @@ nodes:
       chat:
         state_row: "Chat"
         required: true
-        display_suffix: (Chat)
         prompt_hint: which Telegram chat or bot to listen to
 
   google_drive_trigger:
@@ -183,7 +178,6 @@ nodes:
       folder:
         state_row: "Watched Folder"
         required: true
-        display_suffix: (Folder)
         prompt_hint: which Google Drive folder to watch for new files
 
   google_calendar_trigger:
@@ -196,7 +190,6 @@ nodes:
       calendar:
         state_row: "Calendar"
         required: true
-        display_suffix: (Calendar)
         prompt_hint: which Google Calendar to watch for new events
       minutes_before: { required: false }
 
@@ -248,7 +241,6 @@ nodes:
       repository:
         state_row: "Repository"
         required: true
-        display_suffix: (Repository)
         prompt_hint: which GitHub repository to watch
       event:
         state_row: "Repository Event"
@@ -271,7 +263,6 @@ nodes:
       feed_url:
         state_row: "Feed URL"
         required: true
-        display_suffix: (Feed)
         prompt_hint: which RSS feed URL to watch for new items
 
   # ----------------------------------------------------------------- actions
