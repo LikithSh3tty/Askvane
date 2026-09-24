@@ -156,17 +156,19 @@
   .workflow[hidden] { display: none; }
   .workflow .body { padding: 18px 20px 20px; }
   .flow { display: flex; align-items: center; overflow-x: auto; padding: 4px 2px 8px; }
-  .node { flex: none; width: 132px; border-radius: 12px; padding: 10px 12px; background: var(--card); box-shadow: var(--lift); }
-  .node .kind { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12px; line-height: 1.3; letter-spacing: -0.01em; }
+  .node { flex: none; width: 140px; border-radius: 12px; padding: 10px 12px; background: var(--card); box-shadow: var(--lift); }
+  .node .kind { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 12px; line-height: 1.3; letter-spacing: -0.01em; }
   .node .kind i { width: 26px; height: 26px; border-radius: 50%; background: var(--coral-wash); color: var(--coral);
                   display: grid; place-items: center; flex: none; }
   .node .kind i svg { width: 14px; height: 14px; }
   .node .detail { color: var(--ink-soft); font-size: 12px; margin-top: 6px; overflow-wrap: anywhere; }
   .node.trigger .kind i { background: var(--grad-ink); color: #fff; }
   .node.end { width: auto; min-width: 88px; }
-  .node .kind i.brand { background: #FFFFFF; box-shadow: inset 0 0 0 1px var(--line); }
-  .node .kind i.brand svg { width: 15px; height: 15px; }
   .node.end .kind i { background: var(--line); color: var(--ink-soft); }
+  /* App logos and step glyphs sit on a white app-icon tile, as in the reference diagram. */
+  .node .kind i.brand { width: 34px; height: 34px; border-radius: 10px; background: #FFFFFF;
+                        box-shadow: inset 0 0 0 1px var(--line); }
+  .node .kind i.brand svg { width: 20px; height: 20px; }
   .link { flex: none; width: 22px; border-top: 2px dashed var(--coral-soft); position: relative; }
   .link::after { content: ""; position: absolute; right: -2px; top: -5px; border: 4px solid transparent;
                  border-left: 5px solid var(--coral-soft); border-right: 0; }
@@ -299,6 +301,19 @@ const ICONS = {
   stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>',
   check: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
 };
+// Colored glyphs for the steps that are not an app, in the reference diagram's style:
+// a green label filter, a blue document for extraction, an orange branching condition.
+const STEPS = {
+  filter_by_label: '<path fill="#34A853" d="M3 4.5A1.5 1.5 0 0 1 4.5 3h8.8c.4 0 .78.16 1.06.44l6.2 6.2a1.5 1.5 0 0 1 0 2.12l-8.8 8.8a1.5 1.5 0 0 1-2.12 0l-6.2-6.2A1.5 1.5 0 0 1 3 13.3z"/><path fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M7.6 11.6l2.4 2.4 4.6-4.8"/>',
+  extract_fields: '<path fill="#4285F4" d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path fill="#A8C7FA" d="M14 2v6h6z"/><path fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" d="M8 12.5h8M8 15.5h8M8 18.5h5"/>',
+  condition: '<path fill="none" stroke="#F29E1F" stroke-width="2" stroke-linejoin="round" d="M12 5.2 5 18.4h14z"/><circle fill="#F29E1F" cx="12" cy="5.2" r="3"/><circle fill="#F29E1F" cx="5" cy="18.4" r="3"/><circle fill="#F29E1F" cx="19" cy="18.4" r="3"/>',
+  deduplicate: '<rect fill="#C4B5FD" x="3" y="3" width="13" height="13" rx="3"/><rect fill="#7C5CFF" x="8" y="8" width="13" height="13" rx="3"/><path fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" d="M11.5 14.5h6"/>',
+  end: '<rect fill="#E5484D" x="3" y="3" width="18" height="18" rx="5"/><rect fill="#fff" x="8.5" y="8.5" width="7" height="7" rx="1.5"/>',
+  webhook_trigger: '<path fill="none" stroke="#D6336C" stroke-width="2.2" stroke-linecap="round" d="M9 17a4 4 0 1 1 1.5-7.7L14 3"/><path fill="none" stroke="#D6336C" stroke-width="2.2" stroke-linecap="round" d="M15 17h-6"/><path fill="none" stroke="#D6336C" stroke-width="2.2" stroke-linecap="round" d="M15 17a4 4 0 1 0 3.5-5.9L15 7"/>',
+  schedule_trigger: '<circle fill="#6366F1" cx="12" cy="12" r="10"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" d="M12 6.5V12l3.5 2"/>',
+  email_send: '<rect fill="#2563EB" x="2" y="4.5" width="20" height="15" rx="2.5"/><path fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round" d="M3.5 7l8.5 6 8.5-6"/>',
+  http_request: '<circle fill="#0EA5E9" cx="12" cy="12" r="10"/><path fill="none" stroke="#fff" stroke-width="1.5" d="M2.5 12h19M12 2.2a15 15 0 0 1 0 19.6M12 2.2a15 15 0 0 0 0 19.6"/>',
+};
 const NODE_ICON = {
   gmail_trigger: "mail", outlook_trigger: "mail", webhook_trigger: "hook", schedule_trigger: "clock",
   slack_notify: "hash", email_send: "send", http_request: "globe", filter_by_label: "filter",
@@ -364,6 +379,7 @@ const OPS = { gt: ">", lt: "<", eq: "=", contains: "contains" };
 const $ = (id) => document.getElementById(id);
 const icon = (name) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ""}</svg>`;
 const brand = (name) => `<svg viewBox="${BRANDS[name].viewBox}" aria-hidden="true">${BRANDS[name].body}</svg>`;
+const step = (type) => `<svg viewBox="0 0 24 24" aria-hidden="true">${STEPS[type]}</svg>`;
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 let sessionId = null;
@@ -423,7 +439,9 @@ function nodeHtml(node) {
   const kind = node.type.endsWith("_trigger") ? "trigger" : node.type === "end" ? "end" : "";
   const detail = describe(node);
   const logo = NODE_BRAND[node.type];
-  const badge = logo ? `<i class="brand">${brand(logo)}</i>` : `<i>${icon(NODE_ICON[node.type])}</i>`;
+  const badge = logo ? `<i class="brand">${brand(logo)}</i>`
+    : STEPS[node.type] ? `<i class="brand">${step(node.type)}</i>`
+    : `<i>${icon(NODE_ICON[node.type])}</i>`;
   return `<div class="node ${kind}"><div class="kind">${badge}<span>${esc(node.label)}</span></div>` +
          (detail ? `<div class="detail">${esc(detail)}</div>` : "") + `</div>`;
 }
