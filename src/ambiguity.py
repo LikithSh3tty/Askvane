@@ -1,8 +1,11 @@
 """Detect when what the user said has more than one reading. No LLM.
 
-Detection means ask, never pick. Two cases:
+Detection means ask, never pick. Every ambiguity in a message is returned, not
+just the first: the agent asks about one and parks the rest. Two cases:
   - options: the span names more than one option of the same requirement
-    ("email" could be the Gmail trigger or the Outlook trigger);
+    ("email" could be the Gmail trigger or the Outlook trigger). A word inside a
+    longer name the user said belongs to that name: "Google Forms" names Google
+    Forms, not also Typeform through "forms";
   - slots: one piece of free text was read as the answer to two different
     requirements, and neither is the question the user was just asked.
 """
@@ -22,6 +25,22 @@ class Ambiguity:
     options: list = field(default_factory=list)          # competing option ids
     requirements: list[str] = field(default_factory=list)  # competing requirement ids
 
+    @property
+    def slot(self) -> str:
+        return self.requirement.partition(".")[0]
+
+
+def named_options(span: str, aliases: dict) -> list:
+    """Options the span names, dropping any named only by a word inside another option's longer name."""
+    hits = {o: [a for a in names if mentions(span, a)] for o, names in aliases.items()}
+    hits = {o: found for o, found in hits.items() if found}
+
+    def inside_another(option, alias) -> bool:
+        return any(squash(alias) != squash(longer) and mentions(longer, alias)
+                   for other, found in hits.items() if other != option for longer in found)
+
+    return [o for o, found in hits.items() if not all(inside_another(o, a) for a in found)]
+
 
 def _overlap(a: str, b: str) -> bool:
     a, b = squash(a), squash(b)
@@ -38,8 +57,7 @@ def find(accepted: list[Grounded], offered: list[Requirement], catalog: Catalog,
     for g in accepted:
         req = by_id[g.requirement]
         if req.options:
-            named = [o for o, aliases in option_aliases(req, catalog).items()
-                     if any(mentions(g.span, a) for a in aliases)]
+            named = named_options(g.span, option_aliases(req, catalog))
             if len(named) > 1:
                 ambiguous.append(Ambiguity(g.requirement, g.span, options=named))
             else:

@@ -136,6 +136,47 @@ def test_partial_state_table_shows_what_is_missing():
     assert table["Status"] == "4 items still needed"
 
 
+# -- state-table row labels ---------------------------------------------------
+
+BRIEF_ROWS = ["Trigger Source", "Monitor Location", "Condition", "Notification Channel",
+              "Channel / Recipient", "Duplicate Handling", "Additional Preferences", "Status"]
+
+
+def row_names(state, catalog=CATALOG):
+    return [r["parameter"] for r in state_table(state, catalog)]
+
+
+def test_reference_path_keeps_the_briefs_row_names_in_order(reference_run):
+    _, results = reference_run
+    assert row_names(new_state()) == BRIEF_ROWS
+    for r in results:
+        assert [row["parameter"] for row in r.state_table] == BRIEF_ROWS
+
+
+def jira_state():
+    return fill(new_state(), trigger="github_trigger", trigger__repository="acme/webapp", trigger__event="issue",
+                filter__mode="all", action="jira_create_issue", action__project="WEB",
+                action__issue_type="bug", dedupe__enabled=True)
+
+
+def test_jira_action_names_its_own_rows():
+    table = state_table(jira_state(), CATALOG)
+    assert [r["parameter"] for r in table] == [
+        "Trigger Source", "Repository / Repository Event", "Condition", "Issue Tracker",
+        "Project / Issue Type", "Duplicate Handling", "Additional Preferences", "Status"]
+    assert table[4]["value"] == "WEB, bug"
+
+
+def test_node_without_state_row_falls_back_to_the_briefs_names():
+    jira = CATALOG.nodes["jira_create_issue"]
+    bare = jira.model_copy(update={
+        "state_row": None,
+        "params": {k: v.model_copy(update={"state_row": None}) for k, v in jira.params.items()}})
+    catalog = CATALOG.model_copy(update={"nodes": {**CATALOG.nodes, "jira_create_issue": bare}})
+    names = row_names(jira_state(), catalog)
+    assert names[3:5] == ["Notification Channel", "Channel / Recipient"]
+
+
 # -- ambiguity ----------------------------------------------------------------
 
 def offered(state):
@@ -152,6 +193,22 @@ def test_word_naming_two_options_is_ambiguous():
 def test_specific_word_is_not_ambiguous():
     clear, amb = find([Grounded("trigger", "gmail_trigger", "Gmail")], offered(new_state()), CATALOG, None)
     assert amb == [] and clear[0].value == "gmail_trigger"
+
+
+def test_every_ambiguity_in_a_message_is_returned():
+    said = [Grounded("trigger", "google_forms_trigger", "form"),
+            Grounded("action", "google_sheets_append", "spreadsheet")]
+    clear, amb = find(said, offered(new_state()), CATALOG, None)
+    assert clear == []
+    assert [(a.slot, a.span, set(a.options)) for a in amb] == [
+        ("trigger", "form", {"google_forms_trigger", "typeform_trigger"}),
+        ("action", "spreadsheet", {"google_sheets_append", "excel_append"})]
+
+
+def test_word_inside_a_longer_name_belongs_to_that_name():
+    clear, amb = find([Grounded("trigger", "google_forms_trigger", "Google Forms")],
+                      offered(new_state()), CATALOG, None)
+    assert amb == [] and clear[0].value == "google_forms_trigger"
 
 
 def test_one_span_filling_two_text_slots_is_ambiguous():

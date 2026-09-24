@@ -75,8 +75,19 @@ def test_minimal_valid_catalog_loads(tmp_path):
     VALID_SLOTS.replace("choose: trigger, display", "node: ghost, display"),
     # not YAML at all
     "slots: [unclosed",
+    # a state-table row label that is blank, or not a string
+    VALID_SLOTS.replace("label: T\n", "label: T\n    state_row: \"  \"\n"),
+    VALID_SLOTS.replace("{ required: true }", "{ required: true, state_row: [a, b] }"),
 ], ids=["unknown-key", "missing-kind", "default-outside-enum", "no-params",
-        "required-if-unknown", "slot-unknown-node", "bad-yaml"])
+        "required-if-unknown", "slot-unknown-node", "bad-yaml", "blank-state-row", "state-row-not-text"])
 def test_malformed_catalog_raises(tmp_path, body):
     with pytest.raises(CatalogError):
         load_catalog(write(tmp_path, body))
+
+
+def test_state_row_is_optional_and_read_when_given(tmp_path):
+    body = VALID_SLOTS.replace("label: T\n", "label: T\n    state_row: Source\n") \
+                      .replace("{ required: true }", "{ required: true, state_row: Thing }")
+    node = load_catalog(write(tmp_path, body)).nodes["t"]
+    assert node.state_row == "Source" and node.params["x"].state_row == "Thing"
+    assert load_catalog(write(tmp_path, VALID_SLOTS)).nodes["t"].state_row is None

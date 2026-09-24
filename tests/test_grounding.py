@@ -5,9 +5,9 @@ import pytest
 from src.catalog.loader import get_catalog
 from src.engine import requirements
 from src.extractor import Extraction, extract
-from src.grounding import Grounded, Rejection, ground, mentions
+from src.grounding import Grounded, Rejection, check_pending, ground, mentions
 from src.llm.stub import StubLLM
-from src.state import WorkflowState
+from src.state import PendingAmbiguity, Turn, WorkflowState
 
 CATALOG = get_catalog()
 REFERENCE_OPENING = "Whenever a new invoice arrives, notify my finance team."
@@ -118,3 +118,35 @@ def test_guessed_slack_from_notify_is_rejected():
 ])
 def test_mentions_uses_word_boundaries(text, phrase, expected):
     assert mentions(text, phrase) is expected
+
+
+# -- parked ambiguities are grounded like values -----------------------------
+
+SHEETS_OR_EXCEL = ["google_sheets_append", "excel_append"]
+
+
+def pending_check(span, options=SHEETS_OR_EXCEL, said="Add new form responses to a spreadsheet", turn=0):
+    state = WorkflowState.new("p", CATALOG)
+    state.transcript.append(Turn(role="user", text=said))
+    action = next(r for r in requirements(state, CATALOG) if r.id == "action")
+    return check_pending(PendingAmbiguity(requirement="action", span=span, options=options, turn=turn),
+                         state, action, CATALOG)
+
+
+def test_parked_ambiguity_from_the_users_words_is_accepted():
+    assert pending_check("spreadsheet") is None
+
+
+def test_parked_ambiguity_whose_span_was_never_said_is_rejected():
+    assert "span" in pending_check("spreadsheet", said="Add new form responses to Slack")
+    assert "span" in pending_check("spreadsheet", turn=3)
+
+
+def test_parked_ambiguity_must_name_every_option_it_narrows_to():
+    # "spreadsheet" was said, but it does not name Airtable.
+    assert "name every option" in pending_check("spreadsheet", ["google_sheets_append", "airtable_create_record"])
+
+
+def test_parked_ambiguity_must_offer_a_real_choice():
+    assert "choice" in pending_check("spreadsheet", ["google_sheets_append"])
+    assert "choice" in pending_check("spreadsheet", ["google_sheets_append", "discord_bot"])

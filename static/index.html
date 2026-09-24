@@ -281,6 +281,7 @@
 </main>
 
 <script>
+// Placeholder labels before the first reply; after that the server names every row.
 const ROWS = ["Trigger Source", "Monitor Location", "Condition", "Notification Channel",
               "Channel / Recipient", "Duplicate Handling", "Additional Preferences", "Status"];
 const UNSET = "–";
@@ -366,7 +367,7 @@ const brand = (name) => `<svg viewBox="${BRANDS[name].viewBox}" aria-hidden="tru
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 let sessionId = null;
-let previous = {};
+let previous = [];
 let busy = false;
 
 function addMessage(role, text, extra = "") {
@@ -381,21 +382,22 @@ function addMessage(role, text, extra = "") {
 }
 
 function renderTable(rows) {
-  const values = Object.fromEntries((rows || []).map((r) => [r.parameter, r.value]));
-  $("rows").innerHTML = ROWS.map((p) => {
-    const v = values[p] ?? UNSET;
-    const fresh = previous[p] !== undefined && previous[p] !== v && v !== UNSET ? " fresh" : "";
-    const status = p === "Status" ? " status" : "";
-    return `<tr class="${(fresh + status).trim()}"><th scope="row">${esc(p)}</th>` +
-           `<td class="${v === UNSET ? "unset" : ""}">${esc(v === UNSET && p === "Status" ? "Waiting for your request" : v)}</td></tr>`;
+  // Rows arrive in a fixed order, but their labels depend on the apps chosen, so match by position.
+  const shown = ROWS.map((label, i) => rows?.[i] ?? { parameter: label, value: UNSET });
+  const status = shown[shown.length - 1].value;
+  $("rows").innerHTML = shown.map(({ parameter: p, value: v }, i) => {
+    const fresh = previous[i] !== undefined && previous[i] !== v && v !== UNSET ? " fresh" : "";
+    const last = i === shown.length - 1;
+    return `<tr class="${(fresh + (last ? " status" : "")).trim()}"><th scope="row">${esc(p)}</th>` +
+           `<td class="${v === UNSET ? "unset" : ""}">${esc(v === UNSET && last ? "Waiting for your request" : v)}</td></tr>`;
   }).join("");
-  previous = Object.fromEntries(ROWS.map((p) => [p, values[p] ?? UNSET]));
+  previous = shown.map((r) => r.value);
 
-  const known = ROWS.slice(0, 6).filter((p) => (values[p] ?? UNSET) !== UNSET).length;
-  const complete = values.Status === "All information collected";
+  const known = shown.slice(0, 6).filter((r) => r.value !== UNSET).length;
+  const complete = status === "All information collected";
   $("sheet").classList.toggle("complete", complete);
   $("fill").style.transform = `scaleX(${complete ? 1 : known / 6})`;
-  $("meter-text").textContent = complete ? "Complete" : (values.Status && values.Status !== UNSET ? values.Status : "Nothing yet");
+  $("meter-text").textContent = complete ? "Complete" : (status !== UNSET ? status : "Nothing yet");
 }
 
 function describe(node) {

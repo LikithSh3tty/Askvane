@@ -20,6 +20,11 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
+def _check_row_label(label: str | None) -> None:
+    if label is not None and not label.strip():
+        raise ValueError("state_row must not be blank")
+
+
 class ParamSpec(_Strict):
     required: bool = False
     required_if: dict[str, list[Any]] | None = None
@@ -28,9 +33,11 @@ class ParamSpec(_Strict):
     default: Any = None
     prompt_hint: str | None = None
     display_suffix: str | None = None
+    state_row: str | None = None     # label of the state-table row that carries this value
 
     @model_validator(mode="after")
     def _check(self) -> "ParamSpec":
+        _check_row_label(self.state_row)
         if self.required and self.required_if:
             raise ValueError("a param cannot be both required and required_if")
         if self.enum is not None:
@@ -50,10 +57,12 @@ class NodeSpec(_Strict):
     display: str | None = None
     aliases: list[str] = Field(default_factory=list)
     selectable: bool = True
+    state_row: str | None = None     # label of the state-table row that names this node
     params: dict[str, ParamSpec]
 
     @model_validator(mode="after")
     def _check(self) -> "NodeSpec":
+        _check_row_label(self.state_row)
         if not self.params:
             raise ValueError("a node must declare at least one param")
         for name, spec in self.params.items():

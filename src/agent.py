@@ -7,19 +7,23 @@ deterministic code.
 """
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, field, replace
 
 from src import ambiguity
 from src.catalog.loader import Catalog, get_catalog
 from src.engine import (REPHRASE_AFTER, Requirement, is_complete, next_question,
-                        open_requirements, requirements)
+                        open_requirements, pending_for, requirements, settle_pending)
 from src.extractor import Extraction, extract
 from src.generator import generate, state_table
-from src.grounding import Grounded, as_number, coerce_option, ground, mentions, option_aliases
+from src.grounding import (Grounded, as_number, check_pending, coerce_option, ground, mentions,
+                           option_aliases)
 from src.llm.base import LLM
 from src.phraser import option_name, phrase
-from src.state import Turn, WorkflowState
+from src.state import PendingAmbiguity, Turn, WorkflowState
+
+log = logging.getLogger(__name__)
 
 COMPLETE_REPLY = "I have all the required information. Generating your workflow."
 # Words that mark a change of mind. Only then are already-filled requirements back on offer.
@@ -68,6 +72,41 @@ def _decline(item: Extraction, offered: list[Requirement], catalog: Catalog) -> 
     return f"I can't build a workflow with {item.span}: it isn't one of the supported options ({listed}). "
 
 
+def _park(found: list[ambiguity.Ambiguity], state: WorkflowState, turn: int, catalog: Catalog) -> None:
+    """Keep every option ambiguity from this message against its requirement, grounded first.
+
+    Only one of them is asked about now; the rest narrow their question when it comes up.
+    """
+    reqs = {r.id: r for r in requirements(state, catalog)}
+    parked: set[str] = set()
+    for amb in found:
+        req = reqs.get(amb.requirement)
+        if not amb.options or req is None or amb.requirement in parked:
+            continue
+        pending = PendingAmbiguity(requirement=amb.requirement, span=amb.span,
+                                   options=list(amb.options), turn=turn)
+        reason = check_pending(pending, state, req, catalog)
+        if reason:
+            log.warning("not parking %s=%r (span %r): %s", amb.requirement, amb.options, amb.span, reason)
+            continue
+        state.pending_ambiguities[amb.requirement] = pending
+        parked.add(amb.requirement)
+
+
+def _narrowed(req: Requirement, state: WorkflowState, catalog: Catalog) -> ambiguity.Ambiguity | None:
+    """The parked narrowing to ask instead of the open question, if one still holds."""
+    pending = pending_for(state, req)
+    if pending is None:
+        return None
+    # Asked twice already without an answer: come at it with the open rephrase instead.
+    reason = "asked twice without an answer" if req.rephrase else check_pending(pending, state, req, catalog)
+    if reason:
+        log.warning("dropping parked %s (span %r): %s", req.id, pending.span, reason)
+        del state.pending_ambiguities[req.id]
+        return None
+    return ambiguity.Ambiguity(req.id, pending.span, options=list(pending.options))
+
+
 def handle_turn(state: WorkflowState, utterance: str, llm: LLM, catalog: Catalog | None = None,
                 guard: bool = True) -> TurnResult:
     catalog = catalog or get_catalog()
@@ -105,6 +144,8 @@ def handle_turn(state: WorkflowState, utterance: str, llm: LLM, catalog: Catalog
                 state.declined.append(item.span)
         offered = requirements(state, catalog, include_optional=True)
     state.rejections += rejected
+    _park(ambiguous, state, turn, catalog)
+    settle_pending(state, catalog)
 
     workflow = None
     if ambiguous:
@@ -123,7 +164,8 @@ def handle_turn(state: WorkflowState, utterance: str, llm: LLM, catalog: Catalog
         still_open = [r for r in open_requirements(state, catalog) if r.id in declined_reqs]
         if still_open:
             req = replace(still_open[0], rephrase=state.asked.get(still_open[0].id, 0) >= REPHRASE_AFTER)
-        reply = "".join(declines) + phrase(llm, req, state, catalog)
+        # A narrowing parked from an earlier message is asked before the open question.
+        reply = "".join(declines) + phrase(llm, req, state, catalog, ambiguity=_narrowed(req, state, catalog))
         state.mark_asked(req.id)
 
     state.transcript.append(Turn(role="agent", text=reply))

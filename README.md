@@ -166,15 +166,15 @@ python eval/run_eval.py --provider stub --no-grounding --out eval/results_no_gro
 python eval/run_eval.py --readme                    # refreshes the table below
 ```
 
-`eval/conversations.yaml` holds 31 scripted conversations covering plain requests, apps beyond the reference (Google Sheets, Teams, Stripe, SMS, Typeform, Excel, GitHub, Jira, Shopify, Telegram, Notion), one message answering several questions, answers given before they were asked, genuinely ambiguous wording, changes of mind, everything in the first message, requests the catalog cannot express, and a user who stops early. Each run is classified as `exact`, `complete_different`, `incomplete`, or `assumed` (a value the user never gave reached the state, the one failure the brief forbids by name).
+`eval/conversations.yaml` holds 34 scripted conversations covering plain requests, apps beyond the reference (Google Sheets, Teams, Stripe, SMS, Typeform, Excel, GitHub, Jira, Shopify, Telegram, Notion), one message answering several questions, answers given before they were asked, genuinely ambiguous wording (including two ambiguities in one message), changes of mind, everything in the first message, requests the catalog cannot express, and a user who stops early. Each run is classified as `exact`, `complete_different`, `incomplete`, or `assumed` (a value the user never gave reached the state, the one failure the brief forbids by name).
 
 <!-- eval:start -->
 | Run | Provider | Conversations | exact | complete_different | incomplete | assumed | Guard rejections |
 |---|---|---|---|---|---|---|---|
-| Grounding on | stub | 31 | 31 | 0 | 0 | 0 | 8 |
-| Grounding off (ablation) | stub | 31 | 29 | 0 | 0 | 2 | 0 |
+| Grounding on | stub | 34 | 34 | 0 | 0 | 0 | 8 |
+| Grounding off (ablation) | stub | 34 | 32 | 0 | 0 | 2 | 0 |
 
-Turns to reach a complete workflow (grounding on): 1 turn: 2, 2 turns: 3, 3 turns: 5, 4 turns: 5, 5 turns: 7, 6 turns: 2, 7 turns: 3, 9 turns: 1.
+Turns to reach a complete workflow (grounding on): 1 turn: 2, 2 turns: 3, 3 turns: 5, 4 turns: 5, 5 turns: 7, 6 turns: 3, 7 turns: 3, 8 turns: 2, 9 turns: 1.
 <!-- eval:end -->
 
 The ablation turns the grounding guard off and replays the same conversations. The `assumed` check in the harness does not reuse the guard's logic, so any hallucination that survives to the end of a conversation shows up there. Most of the 8 the guard rejects are later overwritten by what the user really says; the 2 conversations that still fail keep an "Inbox" label and a duplicate preference nobody stated, and an email action read out of "text me".
@@ -188,5 +188,5 @@ The ablation turns the grounding guard off and replays the same conversations. T
 - Aliases in the catalog are English and hand-written. A synonym that is missing from the list gets a clarifying question rather than a wrong answer, but it still costs the user a turn.
 - Optional details (Slack message text, email subject) are kept if volunteered but never asked for.
 - Sessions live in one process's memory and are lost on restart. Running more than one worker would need a shared store.
-- The state table keeps the reference's row names, so for a spreadsheet or Jira action the "Notification Channel" and "Channel / Recipient" rows hold the app and its details rather than a literal channel.
-- When one message is ambiguous twice ("add form responses to a spreadsheet"), only the first ambiguity is asked about. The second word is not kept, so the agent later asks for that slot from scratch.
+- State-table row labels come from the catalog, so a Jira action shows "Issue Tracker" and "Project / Issue Type" while the reference path keeps the brief's wording. The table still has the reference's fixed eight rows: a node that needs two details shares one values row under a joined label, and optional details all land in "Additional Preferences".
+- When one message is ambiguous twice ("add form responses to a spreadsheet"), the first is asked about and the second is parked, then asked as a narrowed question ("Google Sheets or Excel?") when its turn comes. What still does not work: only ambiguities between named options are parked, so a phrase that could answer two free-text questions is lost unless it came first; a narrowing is built from one message and a later message cannot add to it; and a change of mind about the first answer always keeps the parked second, even when the correction implies otherwise ("actually, keep everything in Google").

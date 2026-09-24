@@ -120,4 +120,36 @@ The image contains the app, the catalog and the UI, nothing else: `.dockerignore
 
 ## The catalog goes beyond the spec's eleven node types
 
-The spec named four triggers and three actions. The catalog now also covers Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub and RSS as triggers, and Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable and Asana as actions. No code changed to support them: each is a catalog entry, and its required details become questions the same way Gmail's label does. Where one word names two apps ("a spreadsheet" is Google Sheets or Excel, "a form" is Google Forms or Typeform), the aliases overlap on purpose so the ambiguity check asks. The unsupported-request conversations now use apps that are still outside the catalog (Mattermost, Jotform, Signal). The state table keeps the reference's row names, so "Notification Channel" also holds a spreadsheet or a Jira project.
+The spec named four triggers and three actions. The catalog now also covers Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub and RSS as triggers, and Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable and Asana as actions. No code changed to support them: each is a catalog entry, and its required details become questions the same way Gmail's label does. Where one word names two apps ("a spreadsheet" is Google Sheets or Excel, "a form" is Google Forms or Typeform), the aliases overlap on purpose so the ambiguity check asks. The unsupported-request conversations now use apps that are still outside the catalog (Mattermost, Jotform, Signal). State-table row labels now come from the catalog too (see below), so a Jira action no longer sits under "Notification Channel".
+
+## State-table row labels live in the catalog
+
+The generator used to name every row itself, so a Jira project appeared under "Channel / Recipient". What a row means depends on the node in it, and the catalog is where nodes are described, so each node declares the label of the row that names it and each required param the label of the row carrying its value. The reference path declares the brief's exact wording (Trigger Source, Monitor Location, Condition, Notification Channel, Channel / Recipient, Duplicate Handling), a test pins those eight names in the brief's order, and the order itself stays in the generator because it is the reference table's. A node without a label falls back to the slot's display name, or the brief's name for a values row, so the catalog can be labelled gradually.
+
+## A values row joins the labels of the params it shows
+
+The trigger and action values each share one row, and some nodes need two details (a Trello board and list, a Jira project and issue type). Adding rows would break the reference's fixed shape, so the row's label joins the distinct labels of the required params in declaration order: "Project / Issue Type". Because only currently required params count, a schedule reads "Frequency" until a daily frequency makes the run time required. The newer triggers dropped their value suffixes ("Leads 2026 (Spreadsheet)") once the label said the same thing; Gmail and Outlook keep "(Label)" and "(Folder)" because the reference shows "Finance (Label)".
+
+## The UI matches table rows by position
+
+Row labels now change with the chosen apps, so the page can no longer look values up by label. The server always sends the same eight rows in the same order; the page renders them by position and keeps the brief's labels only as placeholders before the first reply.
+
+## A second ambiguity is parked, not asked at once
+
+"Add form responses to a spreadsheet" is ambiguous twice: the form could be Google Forms or Typeform, the spreadsheet Google Sheets or Excel. Asking both at once would be a compound question, which the one-question rule forbids, and dropping the second made the agent later ask "Where should the notification be sent?" as if the user had said nothing. So every ambiguity between named options is parked against its requirement, the first is asked now, and when the engine next picks a requirement that has a parked narrowing, the agent asks "Google Sheets or Excel?" instead of the open question. The one asked now is parked too, so if it goes unanswered it is asked again in its narrowed form.
+
+## A parked ambiguity carries its span and is checked like a value
+
+A narrowing changes what the agent asks, so it must not become a way round the guard. It keeps the exact words and the turn they came from, and before it is parked and again before it is used, `grounding.check_pending` confirms that those words appear in that turn's message, that they name every option it narrows to, and that the options are still a real choice for the requirement. It only ever narrows a question; the answer still goes through extraction and grounding like any other, so a narrowing can never fill a slot.
+
+## Stale narrowing is dropped
+
+A parked ambiguity is removed as soon as its requirement is answered, whether or not the answer was one of its candidates ("Neither, use Airtable" discards Sheets-or-Excel), and when a change of node removes its requirement. It is also dropped if the narrowed question has gone unanswered twice, so the third ask is the open rephrase rather than the same question again. When the user changes their mind about the first ambiguity ("Actually, make it Typeform"), the parked second is kept: the correction concerns a different requirement, and the user's word "spreadsheet" is still true. The eval pins this in `c33`.
+
+## A word inside a longer name belongs to that name
+
+With Typeform answering to "forms", the user's own "Google Forms" named both form apps and would have been asked about again. The ambiguity check now drops an option whose only match is a word inside a longer alias of another option that the same span also matches, so "Google Forms" is Google Forms and a bare "form" is still ambiguous.
+
+## Only option ambiguities are parked
+
+The other kind of ambiguity, one phrase read as the answer to two free-text requirements, is asked about when it is first in the message and otherwise dropped as before. Parking it would mean asking "When you say 'Finance', do you mean the label or the channel?" several questions after the user said it, which reads worse than asking the open question.
