@@ -69,3 +69,19 @@ def test_empty_message_is_rejected(client):
 def test_index_page_is_served(client):
     res = client.get("/")
     assert res.status_code == 200 and "Collected information" in res.text
+
+
+def test_unexpected_error_names_its_type_but_not_its_message():
+    from fastapi.testclient import TestClient
+
+    from app.main import create_app
+    from src.llm.base import LLM
+
+    class Broken(LLM):
+        def complete_json(self, system, user, schema):
+            raise ValueError("secret-looking detail sk-ant-xyz")
+
+    client = TestClient(create_app(Broken()), raise_server_exceptions=False)
+    r = client.post("/chat", json={"message": "hello"})
+    assert r.status_code == 500
+    assert r.json() == {"detail": "internal error: ValueError"}

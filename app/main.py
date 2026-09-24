@@ -1,10 +1,12 @@
 """FastAPI app: chat routes and the static UI."""
 from __future__ import annotations
 
+import sys
+import traceback
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -44,6 +46,13 @@ def create_app(llm: LLM | None = None) -> FastAPI:
     app = FastAPI(title="Askvane clarification agent")
     app.state.llm = llm or make_llm()
     app.state.sessions = SessionStore()
+
+    @app.exception_handler(Exception)
+    async def unexpected(request: Request, exc: Exception) -> JSONResponse:
+        # The traceback goes to the server log; the client sees only the exception type,
+        # never its message, which could quote a secret (a malformed key in a header error).
+        print("".join(traceback.format_exception(exc)), file=sys.stderr, flush=True)
+        return JSONResponse(status_code=500, content={"detail": f"internal error: {type(exc).__name__}"})
 
     def find(session_id: str) -> Session:
         session = app.state.sessions.get(session_id)
