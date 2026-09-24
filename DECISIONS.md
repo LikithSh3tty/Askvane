@@ -96,7 +96,7 @@ Extraction is restricted to open requirements, which on its own would make "actu
 
 ## Unsupported requests are declined, then the question is asked again
 
-When the user names something the catalog cannot express ("post it to Discord"), the extractor reports it as unsupported, and deterministic code confirms the span is real and matches none of the options. The agent says it cannot do that, lists what it can, and keeps the requirement open. It never maps Discord onto the nearest thing it does support.
+When the user names something the catalog cannot express ("post it to Mattermost"), the extractor reports it as unsupported, and deterministic code confirms the span is real and matches none of the options. The agent says it cannot do that, lists what it can, and keeps the requirement open. It never maps Mattermost onto the nearest thing it does support.
 
 ## Derived nodes
 
@@ -117,3 +117,7 @@ With the stub, the "model" is a lookup table, so a 25/25 score measures the dete
 ## Keys reach the container at run time only
 
 The image contains the app, the catalog and the UI, nothing else: `.dockerignore` keeps out `.env`, tests, eval and docs. `docker-compose.yml` passes `ANTHROPIC_API_KEY` from the shell or `.env` when the container starts, so no key is ever written into a layer. With no key the app falls back to the offline stub, so `docker compose up` works on a fresh machine.
+
+## The catalog goes beyond the spec's eleven node types
+
+The spec named four triggers and three actions. The catalog now also covers Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub and RSS as triggers, and Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable and Asana as actions. No code changed to support them: each is a catalog entry, and its required details become questions the same way Gmail's label does. Where one word names two apps ("a spreadsheet" is Google Sheets or Excel, "a form" is Google Forms or Typeform), the aliases overlap on purpose so the ambiguity check asks. The unsupported-request conversations now use apps that are still outside the catalog (Mattermost, Jotform, Signal). The state table keeps the reference's row names, so "Notification Channel" also holds a spreadsheet or a Jira project.

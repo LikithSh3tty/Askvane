@@ -90,6 +90,42 @@ The model reads values out of text and words questions. Everything else is deter
 
 The requirement set is recomputed from state every turn. Choosing Gmail creates a label requirement; choosing Slack creates a channel requirement where email would create a recipient; "only above ₹10,000" creates field, operator and value. The reasoning behind each choice is in [DECISIONS.md](DECISIONS.md).
 
+## Supported apps
+
+Every app is an entry in `src/catalog/nodes.yaml`: its name, the words a user might use for it, and the details it needs. Nothing else in the code names an app, so adding one is a catalog entry, a logo in the UI, and a question for the offline stub.
+
+| Starts the workflow | Needs |
+|---|---|
+| Gmail, Outlook | label or folder |
+| Webhook | URL path |
+| Schedule | how often, then a time and day when that applies |
+| Google Sheets, Excel | spreadsheet or workbook to watch for new rows |
+| Google Forms, Typeform | form |
+| Telegram | chat or bot |
+| Google Drive | folder |
+| Google Calendar | calendar |
+| Stripe | event (payment succeeded or failed, invoice paid, subscription created or cancelled) |
+| Shopify | event (new order, paid order, new customer, product update) |
+| GitHub | repository and event (push, pull request, issue, release) |
+| RSS | feed URL |
+
+| Sends or records the result | Needs |
+|---|---|
+| Slack, Discord | channel |
+| Microsoft Teams | team and channel |
+| Email | recipient address |
+| Telegram | chat |
+| WhatsApp, SMS (Twilio) | phone number |
+| HTTP Request | URL and method |
+| Google Sheets, Excel | spreadsheet or workbook to add a row to |
+| Notion | database |
+| Trello | board and list |
+| Jira | project and issue type |
+| Airtable | base and table |
+| Asana | project |
+
+Words that fit more than one app ("a spreadsheet", "a form", "an email") are asked about rather than guessed. An app that is not listed is declined by name and the question is asked again.
+
 ## Running it
 
 Python 3.11.
@@ -130,15 +166,15 @@ python eval/run_eval.py --provider stub --no-grounding --out eval/results_no_gro
 python eval/run_eval.py --readme                    # refreshes the table below
 ```
 
-`eval/conversations.yaml` holds 25 scripted conversations covering plain requests, one message answering several questions, answers given before they were asked, genuinely ambiguous wording, changes of mind, everything in the first message, requests the catalog cannot express, and a user who stops early. Each run is classified as `exact`, `complete_different`, `incomplete`, or `assumed` (a value the user never gave reached the state, the one failure the brief forbids by name).
+`eval/conversations.yaml` holds 31 scripted conversations covering plain requests, apps beyond the reference (Google Sheets, Teams, Stripe, SMS, Typeform, Excel, GitHub, Jira, Shopify, Telegram, Notion), one message answering several questions, answers given before they were asked, genuinely ambiguous wording, changes of mind, everything in the first message, requests the catalog cannot express, and a user who stops early. Each run is classified as `exact`, `complete_different`, `incomplete`, or `assumed` (a value the user never gave reached the state, the one failure the brief forbids by name).
 
 <!-- eval:start -->
 | Run | Provider | Conversations | exact | complete_different | incomplete | assumed | Guard rejections |
 |---|---|---|---|---|---|---|---|
-| Grounding on | stub | 25 | 25 | 0 | 0 | 0 | 8 |
-| Grounding off (ablation) | stub | 25 | 23 | 0 | 0 | 2 | 0 |
+| Grounding on | stub | 31 | 31 | 0 | 0 | 0 | 8 |
+| Grounding off (ablation) | stub | 31 | 29 | 0 | 0 | 2 | 0 |
 
-Turns to reach a complete workflow (grounding on): 1 turn: 2, 2 turns: 3, 3 turns: 4, 4 turns: 3, 5 turns: 5, 6 turns: 2, 7 turns: 2, 9 turns: 1.
+Turns to reach a complete workflow (grounding on): 1 turn: 2, 2 turns: 3, 3 turns: 5, 4 turns: 5, 5 turns: 7, 6 turns: 2, 7 turns: 3, 9 turns: 1.
 <!-- eval:end -->
 
 The ablation turns the grounding guard off and replays the same conversations. The `assumed` check in the harness does not reuse the guard's logic, so any hallucination that survives to the end of a conversation shows up there. Most of the 8 the guard rejects are later overwritten by what the user really says; the 2 conversations that still fail keep an "Inbox" label and a duplicate preference nobody stated, and an email action read out of "text me".
@@ -152,3 +188,5 @@ The ablation turns the grounding guard off and replays the same conversations. T
 - Aliases in the catalog are English and hand-written. A synonym that is missing from the list gets a clarifying question rather than a wrong answer, but it still costs the user a turn.
 - Optional details (Slack message text, email subject) are kept if volunteered but never asked for.
 - Sessions live in one process's memory and are lost on restart. Running more than one worker would need a shared store.
+- The state table keeps the reference's row names, so for a spreadsheet or Jira action the "Notification Channel" and "Channel / Recipient" rows hold the app and its details rather than a literal channel.
+- When one message is ambiguous twice ("add form responses to a spreadsheet"), only the first ambiguity is asked about. The second word is not kept, so the agent later asks for that slot from scratch.
