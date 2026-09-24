@@ -8,6 +8,9 @@
 # or when `required_if` names a sibling param whose current value is listed.
 # `aliases` map enum members (or selectable nodes) to the words a user might say;
 # the grounding guard uses them to check a value against the text it came from.
+# `state_row` names the collected-information row a node (or param) fills; the
+# reference path keeps the brief's own wording. Without one, the generator falls
+# back to the slot's display name.
 
 slots:
   - id: trigger
@@ -30,10 +33,12 @@ nodes:
   gmail_trigger:
     kind: trigger
     label: Gmail Trigger
+    state_row: "Trigger Source"
     display: Gmail
     aliases: [gmail, google mail, email, e-mail, mail]
     params:
       monitor_location:
+        state_row: "Monitor Location"
         required: true
         display_suffix: (Label)
         prompt_hint: which Gmail label or folder to monitor
@@ -42,10 +47,12 @@ nodes:
   outlook_trigger:
     kind: trigger
     label: Outlook Trigger
+    state_row: "Trigger Source"
     display: Outlook
     aliases: [outlook, office 365, microsoft mail, hotmail, email, e-mail, mail]
     params:
       monitor_location:
+        state_row: "Monitor Location"
         required: true
         display_suffix: (Folder)
         prompt_hint: which Outlook folder to monitor
@@ -54,10 +61,11 @@ nodes:
   webhook_trigger:
     kind: trigger
     label: Webhook Trigger
+    state_row: "Trigger Source"
     display: Webhook
     aliases: [webhook, web hook, http call, api call, incoming request]
     params:
-      path: { required: true, prompt_hint: which URL path the webhook should listen on }
+      path: { state_row: "Webhook Path", required: true, prompt_hint: which URL path the webhook should listen on }
       method:
         required: false
         default: POST
@@ -67,10 +75,12 @@ nodes:
   schedule_trigger:
     kind: trigger
     label: Schedule Trigger
+    state_row: "Trigger Source"
     display: Schedule
     aliases: [schedule, scheduled, every hour, hourly, every day, daily, every morning, every week, weekly, cron]
     params:
       frequency:
+        state_row: "Frequency"
         required: true
         enum: [hourly, daily, weekly]
         aliases:
@@ -79,9 +89,11 @@ nodes:
           weekly: [weekly, every week, every monday, every tuesday, every wednesday, every thursday, every friday, every saturday, every sunday]
         prompt_hint: how often the workflow should run (hourly, daily or weekly)
       time:
+        state_row: "Run Time"
         required_if: { frequency: [daily, weekly] }
         prompt_hint: what time of day it should run
       day_of_week:
+        state_row: "Run Day"
         required_if: { frequency: [weekly] }
         enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
         aliases:
@@ -97,10 +109,12 @@ nodes:
   google_sheets_trigger:
     kind: trigger
     label: Google Sheets Trigger
+    state_row: "Trigger Source"
     display: Google Sheets
     aliases: [google sheets, google sheet, gsheets, sheets, spreadsheet, spreadsheets]
     params:
       spreadsheet:
+        state_row: "Watched Spreadsheet"
         required: true
         display_suffix: (Spreadsheet)
         prompt_hint: which Google Sheets spreadsheet to watch for new rows
@@ -109,10 +123,12 @@ nodes:
   excel_trigger:
     kind: trigger
     label: Excel Trigger
+    state_row: "Trigger Source"
     display: Excel
     aliases: [excel, microsoft excel, excel online, workbook, spreadsheet, spreadsheets]
     params:
       workbook:
+        state_row: "Watched Workbook"
         required: true
         display_suffix: (Workbook)
         prompt_hint: which Excel workbook to watch for new rows
@@ -121,10 +137,12 @@ nodes:
   google_forms_trigger:
     kind: trigger
     label: Google Forms Trigger
+    state_row: "Trigger Source"
     display: Google Forms
     aliases: [google forms, google form, form, forms, form submission, form response]
     params:
       form:
+        state_row: "Form"
         required: true
         display_suffix: (Form)
         prompt_hint: which Google Form to watch for new responses
@@ -132,10 +150,12 @@ nodes:
   typeform_trigger:
     kind: trigger
     label: Typeform Trigger
+    state_row: "Trigger Source"
     display: Typeform
     aliases: [typeform, form, forms, form submission, form response]
     params:
       form:
+        state_row: "Form"
         required: true
         display_suffix: (Form)
         prompt_hint: which Typeform form to watch for new responses
@@ -143,10 +163,12 @@ nodes:
   telegram_trigger:
     kind: trigger
     label: Telegram Trigger
+    state_row: "Trigger Source"
     display: Telegram
     aliases: [telegram]
     params:
       chat:
+        state_row: "Chat"
         required: true
         display_suffix: (Chat)
         prompt_hint: which Telegram chat or bot to listen to
@@ -154,10 +176,12 @@ nodes:
   google_drive_trigger:
     kind: trigger
     label: Google Drive Trigger
+    state_row: "Trigger Source"
     display: Google Drive
     aliases: [google drive, gdrive, drive]
     params:
       folder:
+        state_row: "Watched Folder"
         required: true
         display_suffix: (Folder)
         prompt_hint: which Google Drive folder to watch for new files
@@ -165,10 +189,12 @@ nodes:
   google_calendar_trigger:
     kind: trigger
     label: Google Calendar Trigger
+    state_row: "Trigger Source"
     display: Google Calendar
     aliases: [google calendar, calendar, gcal]
     params:
       calendar:
+        state_row: "Calendar"
         required: true
         display_suffix: (Calendar)
         prompt_hint: which Google Calendar to watch for new events
@@ -177,10 +203,12 @@ nodes:
   stripe_trigger:
     kind: trigger
     label: Stripe Trigger
+    state_row: "Trigger Source"
     display: Stripe
     aliases: [stripe]
     params:
       event:
+        state_row: "Stripe Event"
         required: true
         enum: [payment_succeeded, payment_failed, invoice_paid, subscription_created, subscription_cancelled]
         aliases:
@@ -194,10 +222,12 @@ nodes:
   shopify_trigger:
     kind: trigger
     label: Shopify Trigger
+    state_row: "Trigger Source"
     display: Shopify
     aliases: [shopify]
     params:
       event:
+        state_row: "Shopify Event"
         required: true
         enum: [order_created, order_paid, customer_created, product_updated]
         aliases:
@@ -211,14 +241,17 @@ nodes:
   github_trigger:
     kind: trigger
     label: GitHub Trigger
+    state_row: "Trigger Source"
     display: GitHub
     aliases: [github, git hub]
     params:
       repository:
+        state_row: "Repository"
         required: true
         display_suffix: (Repository)
         prompt_hint: which GitHub repository to watch
       event:
+        state_row: "Repository Event"
         required: true
         enum: [push, pull_request, issue, release]
         aliases:
@@ -231,10 +264,12 @@ nodes:
   rss_trigger:
     kind: trigger
     label: RSS Feed Trigger
+    state_row: "Trigger Source"
     display: RSS Feed
     aliases: [rss, rss feed, feed, blog feed]
     params:
       feed_url:
+        state_row: "Feed URL"
         required: true
         display_suffix: (Feed)
         prompt_hint: which RSS feed URL to watch for new items
@@ -243,30 +278,34 @@ nodes:
   slack_notify:
     kind: action
     label: Slack Notification
+    state_row: "Notification Channel"
     display: Slack
     aliases: [slack]
     params:
-      channel: { required: true, prompt_hint: "which Slack channel to post in (and workspace, if there is more than one)" }
+      channel: { state_row: "Channel / Recipient", required: true, prompt_hint: "which Slack channel to post in (and workspace, if there is more than one)" }
       workspace: { required: false }
       message: { required: false }
 
   email_send:
     kind: action
     label: Email Notification
+    state_row: "Notification Channel"
     display: Email
     aliases: [email, e-mail, mail, send an email, email me]
     params:
-      recipient: { required: true, prompt_hint: which email address should receive it }
+      recipient: { state_row: "Recipient", required: true, prompt_hint: which email address should receive it }
       subject: { required: false }
 
   http_request:
     kind: action
     label: HTTP Request
+    state_row: "Destination Service"
     display: HTTP Request
     aliases: [http request, webhook call, api, post request, call an api, call the api]
     params:
-      url: { required: true, prompt_hint: which URL to send the request to }
+      url: { state_row: "Endpoint URL", required: true, prompt_hint: which URL to send the request to }
       method:
+        state_row: "HTTP Method"
         required: true
         enum: [GET, POST, PUT]
         aliases: { GET: [get], POST: [post], PUT: [put] }
@@ -275,93 +314,104 @@ nodes:
   teams_notify:
     kind: action
     label: Microsoft Teams Message
+    state_row: "Notification Channel"
     display: Microsoft Teams
     aliases: [microsoft teams, ms teams, teams]
     params:
-      team: { required: true, prompt_hint: which Microsoft Teams team to post in }
-      channel: { required: true, prompt_hint: which Teams channel to post in }
+      team: { state_row: "Team", required: true, prompt_hint: which Microsoft Teams team to post in }
+      channel: { state_row: "Channel", required: true, prompt_hint: which Teams channel to post in }
       message: { required: false }
 
   discord_notify:
     kind: action
     label: Discord Message
+    state_row: "Notification Channel"
     display: Discord
     aliases: [discord]
     params:
-      channel: { required: true, prompt_hint: "which Discord channel to post in (and server, if there is more than one)" }
+      channel: { state_row: "Channel", required: true, prompt_hint: "which Discord channel to post in (and server, if there is more than one)" }
       server: { required: false }
       message: { required: false }
 
   telegram_send:
     kind: action
     label: Telegram Message
+    state_row: "Notification Channel"
     display: Telegram
     aliases: [telegram]
     params:
-      chat: { required: true, prompt_hint: "which Telegram chat, group or channel to send the message to" }
+      chat: { state_row: "Chat", required: true, prompt_hint: "which Telegram chat, group or channel to send the message to" }
       message: { required: false }
 
   whatsapp_send:
     kind: action
     label: WhatsApp Message
+    state_row: "Notification Channel"
     display: WhatsApp
     aliases: [whatsapp, whats app]
     params:
-      phone_number: { required: true, prompt_hint: which WhatsApp phone number should receive the message }
+      phone_number: { state_row: "Phone Number", required: true, prompt_hint: which WhatsApp phone number should receive the message }
       message: { required: false }
 
   sms_send:
     kind: action
     label: SMS (Twilio)
+    state_row: "Notification Channel"
     display: SMS
     aliases: [sms, text message, text messages, twilio]
     params:
-      phone_number: { required: true, prompt_hint: which phone number should receive the text message }
+      phone_number: { state_row: "Phone Number", required: true, prompt_hint: which phone number should receive the text message }
       message: { required: false }
 
   google_sheets_append:
     kind: action
     label: Add Row to Google Sheets
+    state_row: "Destination Spreadsheet App"
     display: Google Sheets
     aliases: [google sheets, google sheet, gsheets, sheets, spreadsheet, spreadsheets]
     params:
-      spreadsheet: { required: true, prompt_hint: which Google Sheets spreadsheet to add the row to }
+      spreadsheet: { state_row: "Spreadsheet", required: true, prompt_hint: which Google Sheets spreadsheet to add the row to }
       sheet: { required: false }
 
   excel_append:
     kind: action
     label: Add Row to Excel
+    state_row: "Destination Spreadsheet App"
     display: Excel
     aliases: [excel, microsoft excel, excel online, workbook, spreadsheet, spreadsheets]
     params:
-      workbook: { required: true, prompt_hint: which Excel workbook to add the row to }
+      workbook: { state_row: "Workbook", required: true, prompt_hint: which Excel workbook to add the row to }
       worksheet: { required: false }
 
   notion_create_page:
     kind: action
     label: Create Notion Page
+    state_row: "Destination Workspace"
     display: Notion
     aliases: [notion]
     params:
-      database: { required: true, prompt_hint: which Notion database the new page should go in }
+      database: { state_row: "Database", required: true, prompt_hint: which Notion database the new page should go in }
 
   trello_create_card:
     kind: action
     label: Create Trello Card
+    state_row: "Task Board"
     display: Trello
     aliases: [trello]
     params:
-      board: { required: true, prompt_hint: which Trello board to add the card to }
-      list: { required: true, prompt_hint: which list on that Trello board the card should go in }
+      board: { state_row: "Board", required: true, prompt_hint: which Trello board to add the card to }
+      list: { state_row: "List", required: true, prompt_hint: which list on that Trello board the card should go in }
 
   jira_create_issue:
     kind: action
     label: Create Jira Issue
+    state_row: "Issue Tracker"
     display: Jira
     aliases: [jira]
     params:
-      project: { required: true, prompt_hint: which Jira project to create the issue in }
+      project: { state_row: "Project", required: true, prompt_hint: which Jira project to create the issue in }
       issue_type:
+        state_row: "Issue Type"
         required: true
         enum: [task, bug, story]
         aliases:
@@ -373,19 +423,21 @@ nodes:
   airtable_create_record:
     kind: action
     label: Create Airtable Record
+    state_row: "Destination Database"
     display: Airtable
     aliases: [airtable]
     params:
-      base: { required: true, prompt_hint: which Airtable base to add the record to }
-      table: { required: true, prompt_hint: which table in that Airtable base }
+      base: { state_row: "Base", required: true, prompt_hint: which Airtable base to add the record to }
+      table: { state_row: "Table", required: true, prompt_hint: which table in that Airtable base }
 
   asana_create_task:
     kind: action
     label: Create Asana Task
+    state_row: "Task Manager"
     display: Asana
     aliases: [asana]
     params:
-      project: { required: true, prompt_hint: which Asana project to create the task in }
+      project: { state_row: "Project", required: true, prompt_hint: which Asana project to create the task in }
 
   extract_fields:
     kind: action
@@ -405,6 +457,7 @@ nodes:
   condition:
     kind: logic
     label: Condition
+    state_row: "Condition"
     params:
       mode:
         required: true
@@ -437,6 +490,7 @@ nodes:
   deduplicate:
     kind: logic
     label: Duplicate Handling
+    state_row: "Duplicate Handling"
     params:
       enabled:
         required: true
