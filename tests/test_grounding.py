@@ -150,3 +150,14 @@ def test_parked_ambiguity_must_name_every_option_it_narrows_to():
 def test_parked_ambiguity_must_offer_a_real_choice():
     assert "choice" in pending_check("spreadsheet", ["google_sheets_append"])
     assert "choice" in pending_check("spreadsheet", ["google_sheets_append", "discord_bot"])
+
+
+@pytest.mark.parametrize("said, event", [
+    ("Successful payments", "payment_succeeded"),
+    ("successful payment", "payment_succeeded"),
+    ("failed payments", "payment_failed"),
+    ("paid invoices", "invoice_paid"),
+])
+def test_stripe_events_are_named_in_the_singular_or_the_plural(said, event):
+    out = run("trigger.event", event, said, said + ", above $500", trigger="stripe_trigger")
+    assert isinstance(out, Grounded) and out.value == event

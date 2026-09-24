@@ -205,11 +205,11 @@ nodes:
         required: true
         enum: [payment_succeeded, payment_failed, invoice_paid, subscription_created, subscription_cancelled]
         aliases:
-          payment_succeeded: [successful payment, payment succeeded, payment received, new payment, charge succeeded]
-          payment_failed: [failed payment, payment failed, payment fails, charge failed, declined payment]
-          invoice_paid: [invoice paid, paid invoice]
-          subscription_created: [new subscription, subscription created, new subscriber]
-          subscription_cancelled: [cancelled subscription, subscription cancelled, canceled subscription, churn]
+          payment_succeeded: [successful payment, successful payments, payment succeeded, payments succeeded, payment received, payments received, new payment, new payments, charge succeeded]
+          payment_failed: [failed payment, failed payments, payment failed, payments failed, payment fails, charge failed, declined payment, declined payments]
+          invoice_paid: [invoice paid, invoices paid, paid invoice, paid invoices]
+          subscription_created: [new subscription, new subscriptions, subscription created, new subscriber, new subscribers]
+          subscription_cancelled: [cancelled subscription, cancelled subscriptions, subscription cancelled, canceled subscription, canceled subscriptions, churn]
         prompt_hint: which Stripe event starts the workflow (a payment succeeding or failing, an invoice paid, or a subscription created or cancelled)
 
   shopify_trigger:
@@ -224,9 +224,9 @@ nodes:
         required: true
         enum: [order_created, order_paid, customer_created, product_updated]
         aliases:
-          order_created: [new order, order placed, order created, orders]
-          order_paid: [order paid, paid order]
-          customer_created: [new customer, customer created, signup, sign up]
+          order_created: [new order, new orders, order placed, orders placed, order created, orders]
+          order_paid: [order paid, orders paid, paid order, paid orders]
+          customer_created: [new customer, new customers, customer created, signup, signups, sign up]
           product_updated: [product updated, product changes, stock change, inventory change]
         prompt_hint: which Shopify event starts the workflow (a new order, a paid order, a new customer, or a product update)
       store: { required: false }
