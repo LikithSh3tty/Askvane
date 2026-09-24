@@ -18,6 +18,7 @@ from typing import Any
 from src.catalog.loader import Catalog
 from src.engine import Requirement
 from src.extractor import Extraction
+from src.state import PendingAmbiguity, WorkflowState
 
 log = logging.getLogger(__name__)
 
@@ -130,3 +131,24 @@ def ground(extractions: list[Extraction], utterance: str, offered: list[Requirem
         else:
             accepted.append(result)
     return accepted, rejected
+
+
+def check_pending(pending: PendingAmbiguity, state: WorkflowState, req: Requirement,
+                  catalog: Catalog) -> str | None:
+    """Why a parked ambiguity may not narrow a question about `req`, or None if it may.
+
+    A parked ambiguity is held to the same standard as a value: its span must be
+    words the user said on the turn it claims, and those words must name every
+    option it narrows to. It can only narrow a question, never answer one.
+    """
+    if pending.requirement != req.id:
+        return "parked for a different requirement"
+    said = [t.text for t in state.transcript if t.role == "user"]
+    if not 0 <= pending.turn < len(said) or not pending.span.strip()             or squash(pending.span) not in squash(said[pending.turn]):
+        return "span does not appear in the user's message"
+    if len(pending.options) < 2 or any(o not in req.options for o in pending.options):
+        return f"options are not a choice among {list(req.options)}"
+    aliases = option_aliases(req, catalog)
+    if not all(any(mentions(pending.span, a) for a in aliases[o]) for o in pending.options):
+        return "span does not name every option"
+    return None
