@@ -171,10 +171,10 @@ python eval/run_eval.py --readme                    # refreshes the table below
 <!-- eval:start -->
 | Run | Provider | Conversations | exact | complete_different | incomplete | assumed | Guard rejections |
 |---|---|---|---|---|---|---|---|
-| Grounding on | stub | 31 | 31 | 0 | 0 | 0 | 8 |
-| Grounding off (ablation) | stub | 31 | 29 | 0 | 0 | 2 | 0 |
+| Grounding on | stub | 34 | 34 | 0 | 0 | 0 | 8 |
+| Grounding off (ablation) | stub | 34 | 32 | 0 | 0 | 2 | 0 |
 
-Turns to reach a complete workflow (grounding on): 1 turn: 2, 2 turns: 3, 3 turns: 5, 4 turns: 5, 5 turns: 7, 6 turns: 2, 7 turns: 3, 9 turns: 1.
+Turns to reach a complete workflow (grounding on): 1 turn: 2, 2 turns: 3, 3 turns: 5, 4 turns: 5, 5 turns: 7, 6 turns: 3, 7 turns: 3, 8 turns: 2, 9 turns: 1.
 <!-- eval:end -->
 
 The ablation turns the grounding guard off and replays the same conversations. The `assumed` check in the harness does not reuse the guard's logic, so any hallucination that survives to the end of a conversation shows up there. Most of the 8 the guard rejects are later overwritten by what the user really says; the 2 conversations that still fail keep an "Inbox" label and a duplicate preference nobody stated, and an email action read out of "text me".
