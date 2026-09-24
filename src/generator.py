@@ -18,6 +18,8 @@ NONE = "–"
 OPERATOR_SYMBOL = {"gt": ">", "lt": "<", "eq": "=", "contains": "contains"}
 CURRENCY = re.compile(r"[₹$€£]")
 LOCATION_PARAM = "monitor_location"
+# The brief's wording for a values row whose node declares no label of its own.
+PARAMS_ROW = {"trigger": "Monitor Location", "action": "Channel / Recipient"}
 
 
 def _resolved_params(state: WorkflowState, slot_id: str, catalog: Catalog,
@@ -138,6 +140,25 @@ def _preferences_text(state: WorkflowState, catalog: Catalog) -> str:
     return "; ".join(prefs) or NONE
 
 
+def _node_row(state: WorkflowState, slot_id: str, catalog: Catalog) -> str:
+    """Label of the row naming a slot's node: the node's own, else the slot's."""
+    node_type = state.node_type(slot_id, catalog)
+    label = catalog.nodes[node_type].state_row if node_type else None
+    return label or catalog.slot(slot_id).display
+
+
+def _params_row(state: WorkflowState, slot_id: str, catalog: Catalog) -> str:
+    """Label of the row carrying a node's required values, from the params that declare one."""
+    node_type = state.node_type(slot_id, catalog)
+    labels: list[str] = []
+    if node_type:
+        slot = state.slots[slot_id]
+        for spec in catalog.nodes[node_type].params.values():
+            if spec.state_row and param_required(spec, slot) and spec.state_row not in labels:
+                labels.append(spec.state_row)
+    return " / ".join(labels) or PARAMS_ROW[slot_id]
+
+
 def state_table(state: WorkflowState, catalog: Catalog | None = None) -> list[dict]:
     catalog = catalog or get_catalog()
 
@@ -147,13 +168,14 @@ def state_table(state: WorkflowState, catalog: Catalog | None = None) -> list[di
 
     dedupe = state.get("dedupe.enabled")
     remaining = len(open_requirements(state, catalog))
+    # Labels come from the catalog; the order is the reference table's.
     rows = [
-        ("Trigger Source", display("trigger")),
-        ("Monitor Location", _params_text(state, "trigger", catalog, required_only=True)),
-        ("Condition", _condition_text(state)),
-        ("Notification Channel", display("action")),
-        ("Channel / Recipient", _params_text(state, "action", catalog, required_only=True)),
-        ("Duplicate Handling", _format_value(dedupe) if dedupe else NONE),
+        (_node_row(state, "trigger", catalog), display("trigger")),
+        (_params_row(state, "trigger", catalog), _params_text(state, "trigger", catalog, required_only=True)),
+        (_node_row(state, "filter", catalog), _condition_text(state)),
+        (_node_row(state, "action", catalog), display("action")),
+        (_params_row(state, "action", catalog), _params_text(state, "action", catalog, required_only=True)),
+        (_node_row(state, "dedupe", catalog), _format_value(dedupe) if dedupe else NONE),
         ("Additional Preferences", _preferences_text(state, catalog)),
         ("Status", "All information collected" if remaining == 0
          else f"{remaining} item{'s' if remaining != 1 else ''} still needed"),

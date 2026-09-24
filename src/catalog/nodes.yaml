@@ -10,7 +10,7 @@
 # the grounding guard uses them to check a value against the text it came from.
 # `state_row` names the collected-information row a node (or param) fills; the
 # reference path keeps the brief's own wording. Without one, the generator falls
-# back to the slot's display name.
+# back to the slot's display name, or to the brief's row name for a values row.
 
 slots:
   - id: trigger
