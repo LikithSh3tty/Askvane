@@ -195,6 +195,22 @@ def test_specific_word_is_not_ambiguous():
     assert amb == [] and clear[0].value == "gmail_trigger"
 
 
+def test_every_ambiguity_in_a_message_is_returned():
+    said = [Grounded("trigger", "google_forms_trigger", "form"),
+            Grounded("action", "google_sheets_append", "spreadsheet")]
+    clear, amb = find(said, offered(new_state()), CATALOG, None)
+    assert clear == []
+    assert [(a.slot, a.span, set(a.options)) for a in amb] == [
+        ("trigger", "form", {"google_forms_trigger", "typeform_trigger"}),
+        ("action", "spreadsheet", {"google_sheets_append", "excel_append"})]
+
+
+def test_word_inside_a_longer_name_belongs_to_that_name():
+    clear, amb = find([Grounded("trigger", "google_forms_trigger", "Google Forms")],
+                      offered(new_state()), CATALOG, None)
+    assert amb == [] and clear[0].value == "google_forms_trigger"
+
+
 def test_one_span_filling_two_text_slots_is_ambiguous():
     state = fill(new_state(), trigger="gmail_trigger", action="slack_notify")
     both = [Grounded("trigger.monitor_location", "Finance", "Finance"),
