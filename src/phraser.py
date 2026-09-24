@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 from src.ambiguity import Ambiguity
 from src.catalog.loader import Catalog
@@ -21,6 +22,7 @@ SYSTEM = """You word one clarification question for an assistant that builds aut
 
 The assistant has already decided what to ask. You decide only how to say it.
 - Ask about the given requirement and nothing else. One short question, ending with a question mark.
+- Plain text on one line: no line breaks, markdown or LaTeX. Use a comma where you might use a dash.
 - Use the conversation for context and the user's own words (say "invoices" if they talk about invoices).
 - Never suggest or assume a value the user has not given, except when listing the allowed options.
 - If `rephrase` is true, the plain question has been asked twice without an answer. Ask it differently: list the options, or give one concrete example of a valid answer.
@@ -45,6 +47,15 @@ def fallback(req: Requirement) -> str:
     return f"Could you tell me {req.hint}?"
 
 
+# LaTeX dash commands a model sometimes writes; inside JSON "\ndash" arrives as a newline and "dash".
+LATEX_DASH = re.compile(r"\s*(?:\\[nm]dash\b|\n[nm]?dash\b)\s*")
+
+
+def plain(text: str) -> str:
+    """One line of plain text: LaTeX dashes become a real dash, any line break becomes a space."""
+    return re.sub(r"\s+", " ", LATEX_DASH.sub(" \u2014 ", text)).strip()
+
+
 def phrase(llm: LLM, req: Requirement, state: WorkflowState, catalog: Catalog,
            ambiguity: Ambiguity | None = None) -> str:
     payload = {
@@ -61,6 +72,6 @@ def phrase(llm: LLM, req: Requirement, state: WorkflowState, catalog: Catalog,
                  else [f"the {_requirement_name(r)}" for r in ambiguity.requirements])
         payload["ambiguity"] = {"span": ambiguity.span, "options": names}
     out = llm.complete_json(SYSTEM, json.dumps(payload, ensure_ascii=False), SCHEMA)
-    question = str(out.get("question", "")).strip()
+    question = plain(str(out.get("question", "")))
     # A malformed wording is not worth failing the turn over; the subject is fixed either way.
     return question if question and len(question) <= 400 else fallback(req)

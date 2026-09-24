@@ -11,7 +11,7 @@ from src.generator import generate, state_table
 from src.grounding import Grounded
 from src.llm.base import LLM
 from src.llm.stub import StubLLM
-from src.phraser import fallback, phrase
+from src.phraser import fallback, phrase, plain
 from src.state import WorkflowState
 
 CATALOG = get_catalog()
@@ -273,3 +273,21 @@ def test_ambiguity_question_quotes_the_users_words():
     _, amb = find([Grounded("trigger", "gmail_trigger", "an email")], offered(state), CATALOG, None)
     question = phrase(StubLLM(), req, state, CATALOG, ambiguity=amb[0])
     assert question == 'When you say "an email", do you mean Gmail or Outlook?'
+
+
+@pytest.mark.parametrize("raw, clean", [
+    # What Claude sent on the live app: LaTeX \ndash, which JSON turns into a newline and "dash".
+    ("Which Stripe event should kick this off \ndash a payment succeeding or failing?",
+     "Which Stripe event should kick this off \u2014 a payment succeeding or failing?"),
+    ("Slack \\mdash or email?", "Slack \u2014 or email?"),
+    ("Which\nchannel?", "Which channel?"),
+    ("Show it on the dashboard?", "Show it on the dashboard?"),
+])
+def test_questions_are_plain_one_line_text(raw, clean):
+    assert plain(raw) == clean
+
+
+def test_phrased_question_is_cleaned_before_it_is_asked():
+    llm = Recorder({"question": "Which Stripe event \ndash payment or invoice?"})
+    req = next_question(new_state(), CATALOG)
+    assert phrase(llm, req, new_state(), CATALOG) == "Which Stripe event \u2014 payment or invoice?"
