@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from src.catalog.loader import Catalog, ParamSpec, get_catalog
-from src.state import SlotState, WorkflowState
+from src.state import PendingAmbiguity, SlotState, WorkflowState
 
 REPHRASE_AFTER = 2   # asked this many times without an answer -> come at it differently
 
@@ -92,3 +92,22 @@ def next_question(state: WorkflowState, catalog: Catalog | None = None) -> Requi
         return None
     req = pending[0]
     return replace(req, rephrase=state.asked.get(req.id, 0) >= REPHRASE_AFTER)
+
+
+def pending_for(state: WorkflowState, req: Requirement) -> PendingAmbiguity | None:
+    """The narrowing parked for the requirement about to be asked, checked before open wording."""
+    return state.pending_ambiguities.get(req.id)
+
+
+def settle_pending(state: WorkflowState, catalog: Catalog | None = None) -> list[str]:
+    """Drop parked ambiguities whose requirement is answered or no longer exists.
+
+    An answer clears its narrowing whether or not it was one of the candidates;
+    a node change that removes the requirement takes its narrowing with it.
+    Stale narrowing is worse than none.
+    """
+    live = {r.id for r in open_requirements(state, catalog)}
+    stale = [req_id for req_id in state.pending_ambiguities if req_id not in live]
+    for req_id in stale:
+        del state.pending_ambiguities[req_id]
+    return stale

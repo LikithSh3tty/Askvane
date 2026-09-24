@@ -2,8 +2,8 @@
 import pytest
 
 from src.catalog.loader import get_catalog
-from src.engine import is_complete, next_question, open_requirements, requirements
-from src.state import WorkflowState
+from src.engine import is_complete, next_question, open_requirements, pending_for, requirements, settle_pending
+from src.state import PendingAmbiguity, WorkflowState
 
 
 @pytest.fixture
@@ -124,3 +124,31 @@ def test_optional_params_are_offered_but_never_required(state):
     optional = [r for r in requirements(state, include_optional=True) if not r.required]
     assert {r.id for r in optional} >= {"action.workspace", "action.message"}
     assert "action.workspace" not in ids(state)
+
+
+# -- parked ambiguities ------------------------------------------------------
+
+def park(state, requirement, span, options):
+    state.pending_ambiguities[requirement] = PendingAmbiguity(
+        requirement=requirement, span=span, options=options, turn=0)
+
+
+def test_parked_ambiguity_is_found_for_its_requirement(state):
+    park(state, "action", "spreadsheet", ["google_sheets_append", "excel_append"])
+    fill(state, trigger="typeform_trigger", trigger__form="Survey", filter__mode="all")
+    req = next_question(state)
+    assert req.id == "action" and pending_for(state, req).span == "spreadsheet"
+
+
+def test_answer_outside_the_candidates_discards_the_parked_ambiguity(state):
+    park(state, "action", "spreadsheet", ["google_sheets_append", "excel_append"])
+    fill(state, action="airtable_create_record")
+    assert settle_pending(state) == ["action"] and state.pending_ambiguities == {}
+
+
+def test_parked_ambiguity_goes_when_its_requirement_stops_existing(state):
+    fill(state, action="jira_create_issue")
+    park(state, "action.issue_type", "ticket", ["task", "bug"])
+    assert settle_pending(state) == []
+    fill(state, action="slack_notify")       # Slack has no issue type
+    assert settle_pending(state) == ["action.issue_type"]
