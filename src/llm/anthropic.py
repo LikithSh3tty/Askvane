@@ -22,7 +22,8 @@ class AnthropicLLM(LLM):
 
     def __init__(self, model: str | None = None):
         self.client = anthropic.Anthropic()
-        self.model = model or os.environ.get("ANTHROPIC_MODEL", DEFAULT_MODEL)
+        # An empty ANTHROPIC_MODEL (a blank env var on a host) means "use the default", not model "".
+        self.model = model or os.environ.get("ANTHROPIC_MODEL", "").strip() or DEFAULT_MODEL
 
     def complete_json(self, system: str, user: str, schema: dict) -> dict:
         body = {k: v for k, v in schema.items() if k != "title"}

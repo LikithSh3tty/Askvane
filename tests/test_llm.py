@@ -144,6 +144,14 @@ def test_anthropic_provider_raises_on_refusal(monkeypatch):
         llm.complete_json("s", "u", {"type": "object"})
 
 
+@pytest.mark.parametrize("value", ["", "  "])
+def test_blank_model_env_falls_back_to_the_default(monkeypatch, value):
+    from src.llm.anthropic import DEFAULT_MODEL, AnthropicLLM
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setenv("ANTHROPIC_MODEL", value)
+    assert AnthropicLLM().model == DEFAULT_MODEL
+
+
 def test_anthropic_api_errors_become_llm_errors(monkeypatch):
     import anthropic
     import httpx2
