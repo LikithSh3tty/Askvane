@@ -94,6 +94,151 @@ nodes:
           sunday: [sunday, sun]
         prompt_hint: which day of the week it should run
 
+  google_sheets_trigger:
+    kind: trigger
+    label: Google Sheets Trigger
+    display: Google Sheets
+    aliases: [google sheets, google sheet, gsheets, sheets, spreadsheet, spreadsheets]
+    params:
+      spreadsheet:
+        required: true
+        display_suffix: (Spreadsheet)
+        prompt_hint: which Google Sheets spreadsheet to watch for new rows
+      sheet: { required: false }
+
+  excel_trigger:
+    kind: trigger
+    label: Excel Trigger
+    display: Excel
+    aliases: [excel, microsoft excel, excel online, workbook, spreadsheet, spreadsheets]
+    params:
+      workbook:
+        required: true
+        display_suffix: (Workbook)
+        prompt_hint: which Excel workbook to watch for new rows
+      worksheet: { required: false }
+
+  google_forms_trigger:
+    kind: trigger
+    label: Google Forms Trigger
+    display: Google Forms
+    aliases: [google forms, google form, form, forms, form submission, form response]
+    params:
+      form:
+        required: true
+        display_suffix: (Form)
+        prompt_hint: which Google Form to watch for new responses
+
+  typeform_trigger:
+    kind: trigger
+    label: Typeform Trigger
+    display: Typeform
+    aliases: [typeform, form, forms, form submission, form response]
+    params:
+      form:
+        required: true
+        display_suffix: (Form)
+        prompt_hint: which Typeform form to watch for new responses
+
+  telegram_trigger:
+    kind: trigger
+    label: Telegram Trigger
+    display: Telegram
+    aliases: [telegram]
+    params:
+      chat:
+        required: true
+        display_suffix: (Chat)
+        prompt_hint: which Telegram chat or bot to listen to
+
+  google_drive_trigger:
+    kind: trigger
+    label: Google Drive Trigger
+    display: Google Drive
+    aliases: [google drive, gdrive, drive]
+    params:
+      folder:
+        required: true
+        display_suffix: (Folder)
+        prompt_hint: which Google Drive folder to watch for new files
+
+  google_calendar_trigger:
+    kind: trigger
+    label: Google Calendar Trigger
+    display: Google Calendar
+    aliases: [google calendar, calendar, gcal]
+    params:
+      calendar:
+        required: true
+        display_suffix: (Calendar)
+        prompt_hint: which Google Calendar to watch for new events
+      minutes_before: { required: false }
+
+  stripe_trigger:
+    kind: trigger
+    label: Stripe Trigger
+    display: Stripe
+    aliases: [stripe]
+    params:
+      event:
+        required: true
+        enum: [payment_succeeded, payment_failed, invoice_paid, subscription_created, subscription_cancelled]
+        aliases:
+          payment_succeeded: [successful payment, payment succeeded, payment received, new payment, charge succeeded]
+          payment_failed: [failed payment, payment failed, payment fails, charge failed, declined payment]
+          invoice_paid: [invoice paid, paid invoice]
+          subscription_created: [new subscription, subscription created, new subscriber]
+          subscription_cancelled: [cancelled subscription, subscription cancelled, canceled subscription, churn]
+        prompt_hint: which Stripe event starts the workflow (a payment succeeding or failing, an invoice paid, or a subscription created or cancelled)
+
+  shopify_trigger:
+    kind: trigger
+    label: Shopify Trigger
+    display: Shopify
+    aliases: [shopify]
+    params:
+      event:
+        required: true
+        enum: [order_created, order_paid, customer_created, product_updated]
+        aliases:
+          order_created: [new order, order placed, order created, orders]
+          order_paid: [order paid, paid order]
+          customer_created: [new customer, customer created, signup, sign up]
+          product_updated: [product updated, product changes, stock change, inventory change]
+        prompt_hint: which Shopify event starts the workflow (a new order, a paid order, a new customer, or a product update)
+      store: { required: false }
+
+  github_trigger:
+    kind: trigger
+    label: GitHub Trigger
+    display: GitHub
+    aliases: [github, git hub]
+    params:
+      repository:
+        required: true
+        display_suffix: (Repository)
+        prompt_hint: which GitHub repository to watch
+      event:
+        required: true
+        enum: [push, pull_request, issue, release]
+        aliases:
+          push: [push, pushes, commit, commits]
+          pull_request: [pull request, pull requests, pr, prs]
+          issue: [issue, issues, bug report]
+          release: [release, releases, new version]
+        prompt_hint: which GitHub event starts the workflow (a push, a pull request, an issue, or a release)
+
+  rss_trigger:
+    kind: trigger
+    label: RSS Feed Trigger
+    display: RSS Feed
+    aliases: [rss, rss feed, feed, blog feed]
+    params:
+      feed_url:
+        required: true
+        display_suffix: (Feed)
+        prompt_hint: which RSS feed URL to watch for new items
+
   # ----------------------------------------------------------------- actions
   slack_notify:
     kind: action
@@ -126,6 +271,121 @@ nodes:
         enum: [GET, POST, PUT]
         aliases: { GET: [get], POST: [post], PUT: [put] }
         prompt_hint: which HTTP method to use (GET, POST or PUT)
+
+  teams_notify:
+    kind: action
+    label: Microsoft Teams Message
+    display: Microsoft Teams
+    aliases: [microsoft teams, ms teams, teams]
+    params:
+      team: { required: true, prompt_hint: which Microsoft Teams team to post in }
+      channel: { required: true, prompt_hint: which Teams channel to post in }
+      message: { required: false }
+
+  discord_notify:
+    kind: action
+    label: Discord Message
+    display: Discord
+    aliases: [discord]
+    params:
+      channel: { required: true, prompt_hint: "which Discord channel to post in (and server, if there is more than one)" }
+      server: { required: false }
+      message: { required: false }
+
+  telegram_send:
+    kind: action
+    label: Telegram Message
+    display: Telegram
+    aliases: [telegram]
+    params:
+      chat: { required: true, prompt_hint: "which Telegram chat, group or channel to send the message to" }
+      message: { required: false }
+
+  whatsapp_send:
+    kind: action
+    label: WhatsApp Message
+    display: WhatsApp
+    aliases: [whatsapp, whats app]
+    params:
+      phone_number: { required: true, prompt_hint: which WhatsApp phone number should receive the message }
+      message: { required: false }
+
+  sms_send:
+    kind: action
+    label: SMS (Twilio)
+    display: SMS
+    aliases: [sms, text message, text messages, twilio]
+    params:
+      phone_number: { required: true, prompt_hint: which phone number should receive the text message }
+      message: { required: false }
+
+  google_sheets_append:
+    kind: action
+    label: Add Row to Google Sheets
+    display: Google Sheets
+    aliases: [google sheets, google sheet, gsheets, sheets, spreadsheet, spreadsheets]
+    params:
+      spreadsheet: { required: true, prompt_hint: which Google Sheets spreadsheet to add the row to }
+      sheet: { required: false }
+
+  excel_append:
+    kind: action
+    label: Add Row to Excel
+    display: Excel
+    aliases: [excel, microsoft excel, excel online, workbook, spreadsheet, spreadsheets]
+    params:
+      workbook: { required: true, prompt_hint: which Excel workbook to add the row to }
+      worksheet: { required: false }
+
+  notion_create_page:
+    kind: action
+    label: Create Notion Page
+    display: Notion
+    aliases: [notion]
+    params:
+      database: { required: true, prompt_hint: which Notion database the new page should go in }
+
+  trello_create_card:
+    kind: action
+    label: Create Trello Card
+    display: Trello
+    aliases: [trello]
+    params:
+      board: { required: true, prompt_hint: which Trello board to add the card to }
+      list: { required: true, prompt_hint: which list on that Trello board the card should go in }
+
+  jira_create_issue:
+    kind: action
+    label: Create Jira Issue
+    display: Jira
+    aliases: [jira]
+    params:
+      project: { required: true, prompt_hint: which Jira project to create the issue in }
+      issue_type:
+        required: true
+        enum: [task, bug, story]
+        aliases:
+          task: [task, tasks]
+          bug: [bug, bugs, defect]
+          story: [story, stories, user story]
+        prompt_hint: which kind of Jira issue to create (task, bug or story)
+
+  airtable_create_record:
+    kind: action
+    label: Create Airtable Record
+    display: Airtable
+    aliases: [airtable]
+    params:
+      base: { required: true, prompt_hint: which Airtable base to add the record to }
+      table: { required: true, prompt_hint: which table in that Airtable base }
+
+  asana_create_task:
+    kind: action
+    label: Create Asana Task
+    display: Asana
+    aliases: [asana]
+    params:
+      project: { required: true, prompt_hint: which Asana project to create the task in }
 
   extract_fields:
     kind: action

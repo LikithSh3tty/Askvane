@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
+from src.catalog.loader import get_catalog
 from src.llm.base import LLMError, make_llm
 from src.llm.stub import RESPONSES_PATH, StubLLM, StubMiss
 
@@ -41,6 +42,23 @@ def test_stub_phrases_every_scripted_requirement(stub, key):
         payload = {"requirement": req, "node": node or None, "rephrase": rephrase}
         out = stub.complete_json("sys", json.dumps(payload), QUESTION)
         assert out["question"].strip()
+
+
+def test_stub_can_phrase_every_question_the_catalog_can_raise():
+    catalog = get_catalog()
+    missing = []
+    for slot in catalog.slots:
+        node_types = catalog.choices(slot.id) if slot.choose else [slot.node]
+        if slot.choose and slot.id not in SCRIPT["question"]:
+            missing.append(slot.id)
+        for node_type in node_types:
+            for name, spec in catalog.nodes[node_type].params.items():
+                if not (spec.required or spec.required_if):
+                    continue
+                req = f"{slot.id}.{name}"
+                if f"{req}:{node_type}" not in SCRIPT["question"] and req not in SCRIPT["question"]:
+                    missing.append(f"{req}:{node_type}")
+    assert missing == []
 
 
 def test_rephrase_differs_from_first_ask(stub):
@@ -130,3 +148,4 @@ def test_anthropic_provider_raises_on_non_json(monkeypatch):
     llm, _ = fake_provider(monkeypatch, "Sure! here you go")
     with pytest.raises(LLMError):
         llm.complete_json("s", "u", {"type": "object"})
+

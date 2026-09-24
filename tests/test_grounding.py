@@ -42,7 +42,7 @@ def test_enum_violation_is_rejected():
 
 
 def test_unknown_node_type_is_rejected():
-    out = run("action", "discord_notify", "Discord", "send it to Discord")
+    out = run("action", "mattermost_notify", "Mattermost", "send it to Mattermost")
     assert isinstance(out, Rejection)
 
 

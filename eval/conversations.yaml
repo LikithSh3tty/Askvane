@@ -284,20 +284,20 @@
     action.channel: "#finance"
     dedupe.enabled: true
 
-- id: c17_discord_is_not_supported
+- id: c17_mattermost_is_not_supported
   category: unsupported
   turns:
-    - When a new invoice arrives in Gmail, post it to Discord
+    - When a new invoice arrives in Gmail, post it to Mattermost
   complete: false
   declined: true
   expected:
     trigger: gmail_trigger
 
-- id: c18_typeform_then_webhook
+- id: c18_jotform_then_webhook
   category: unsupported
   turns:
-    - Send new Typeform responses to Slack
-    - Use a webhook then, at /typeform
+    - Send new Jotform responses to Slack
+    - Use a webhook then, at /jotform
     - all
     - "#leads"
     - "yes"
@@ -305,16 +305,16 @@
   declined: true
   expected:
     trigger: webhook_trigger
-    trigger.path: /typeform
+    trigger.path: /jotform
     filter.mode: all
     action: slack_notify
     action.channel: "#leads"
     dedupe.enabled: true
 
-- id: c19_twitter_and_whatsapp
+- id: c19_twitter_and_signal
   category: unsupported
   turns:
-    - When someone tweets about us, text me on WhatsApp
+    - When someone tweets about us, text me on Signal
   complete: false
   declined: true
   expected: {}
@@ -417,4 +417,109 @@
     filter.value: urgent
     action: slack_notify
     action.channel: "#support"
+    dedupe.enabled: false
+
+# ---------------------------------------------- apps beyond the reference
+
+- id: c26_sheets_to_teams
+  category: more-apps
+  turns:
+    - When a new row is added to Google Sheets, post it to Microsoft Teams
+    - Leads 2026
+    - every row
+    - Sales team, General channel
+    - "Yes"
+  complete: true
+  expected:
+    trigger: google_sheets_trigger
+    trigger.spreadsheet: Leads 2026
+    filter.mode: all
+    action: teams_notify
+    action.team: Sales
+    action.channel: General
+    dedupe.enabled: true
+
+- id: c27_stripe_failed_payment_to_sms
+  category: more-apps
+  turns:
+    - When a Stripe payment fails, send an SMS to +919876543210
+    - all
+    - "No"
+  complete: true
+  expected:
+    trigger: stripe_trigger
+    trigger.event: payment_failed
+    filter.mode: all
+    action: sms_send
+    action.phone_number: "+919876543210"
+    dedupe.enabled: false
+
+- id: c28_form_and_spreadsheet_are_both_ambiguous
+  category: ambiguous
+  turns:
+    - Add new form responses to a spreadsheet
+    - Typeform
+    - Customer survey
+    - all
+    - Excel
+    - Survey results
+    - "Yes"
+  complete: true
+  expected:
+    trigger: typeform_trigger
+    trigger.form: Customer survey
+    filter.mode: all
+    action: excel_append
+    action.workbook: Survey results
+    dedupe.enabled: true
+
+- id: c29_github_issue_to_jira_bug
+  category: more-apps
+  turns:
+    - Open a Jira bug for every new GitHub issue
+    - acme/webapp
+    - WEB
+    - "Yes"
+  complete: true
+  expected:
+    trigger: github_trigger
+    trigger.event: issue
+    trigger.repository: acme/webapp
+    filter.mode: all
+    action: jira_create_issue
+    action.project: WEB
+    action.issue_type: bug
+    dedupe.enabled: true
+
+- id: c30_shopify_orders_to_sheets
+  category: more-apps
+  turns:
+    - Log every new Shopify order in Google Sheets
+    - New orders
+    - Orders 2026
+    - "Yes"
+  complete: true
+  expected:
+    trigger: shopify_trigger
+    trigger.event: order_created
+    filter.mode: all
+    action: google_sheets_append
+    action.spreadsheet: Orders 2026
+    dedupe.enabled: true
+
+- id: c31_telegram_to_notion
+  category: more-apps
+  turns:
+    - When someone messages my Telegram bot, save it to Notion
+    - "@acme_support_bot"
+    - all
+    - Support inbox
+    - "No"
+  complete: true
+  expected:
+    trigger: telegram_trigger
+    trigger.chat: "@acme_support_bot"
+    filter.mode: all
+    action: notion_create_page
+    action.database: Support inbox
     dedupe.enabled: false

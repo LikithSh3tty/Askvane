@@ -1,9 +1,9 @@
 {
   "provider": "stub",
   "grounding": true,
-  "conversations": 25,
+  "conversations": 31,
   "outcomes": {
-    "exact": 25,
+    "exact": 31,
     "complete_different": 0,
     "incomplete": 0,
     "assumed": 0
@@ -11,11 +11,11 @@
   "turns_to_complete": {
     "1": 2,
     "2": 3,
-    "3": 4,
-    "4": 3,
-    "5": 5,
+    "3": 5,
+    "4": 5,
+    "5": 7,
     "6": 2,
-    "7": 2,
+    "7": 3,
     "9": 1
   },
   "guard_rejections": 8,
@@ -277,7 +277,7 @@
       ]
     },
     {
-      "id": "c17_discord_is_not_supported",
+      "id": "c17_mattermost_is_not_supported",
       "category": "unsupported",
       "outcome": "exact",
       "turns": 1,
@@ -286,11 +286,11 @@
       "mismatched": [],
       "rejected_by_guard": 0,
       "replies": [
-        "I can't build a workflow with Discord: it isn't one of the supported options (Slack, Email or HTTP Request). Where should the notification be sent?"
+        "I can't build a workflow with Mattermost: it isn't one of the supported options (Slack, Email, HTTP Request, Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable or Asana). Where should the notification be sent?"
       ]
     },
     {
-      "id": "c18_typeform_then_webhook",
+      "id": "c18_jotform_then_webhook",
       "category": "unsupported",
       "outcome": "exact",
       "turns": 5,
@@ -299,15 +299,15 @@
       "mismatched": [],
       "rejected_by_guard": 0,
       "replies": [
-        "I can't build a workflow with Typeform: it isn't one of the supported options (Gmail, Outlook, Webhook or Schedule). What should start this workflow?",
-        "Should the workflow run every time, or only when a condition is met, such as an amount above a limit?",
+        "I can't build a workflow with Jotform: it isn't one of the supported options (Gmail, Outlook, Webhook, Schedule, Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub or RSS Feed). Which platform receives the response?",
+        "Should every response trigger the workflow, or only responses above a certain amount?",
         "Which Slack workspace and channel?",
-        "Should duplicate leads be ignored?",
+        "Should duplicate responses be ignored?",
         "I have all the required information. Generating your workflow."
       ]
     },
     {
-      "id": "c19_twitter_and_whatsapp",
+      "id": "c19_twitter_and_signal",
       "category": "unsupported",
       "outcome": "exact",
       "turns": 1,
@@ -316,7 +316,7 @@
       "mismatched": [],
       "rejected_by_guard": 1,
       "replies": [
-        "I can't build a workflow with tweets: it isn't one of the supported options (Gmail, Outlook, Webhook or Schedule). I can't build a workflow with WhatsApp: it isn't one of the supported options (Slack, Email or HTTP Request). What should start this workflow?"
+        "I can't build a workflow with tweets: it isn't one of the supported options (Gmail, Outlook, Webhook, Schedule, Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub or RSS Feed). I can't build a workflow with Signal: it isn't one of the supported options (Slack, Email, HTTP Request, Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable or Asana). What should start this workflow?"
       ]
     },
     {
@@ -350,7 +350,7 @@
       "replies": [
         "Which platform receives the invoice?",
         "Which platform receives the invoice?",
-        "I need to know what starts this workflow. Please pick one: Gmail, Outlook, a webhook, or a schedule.",
+        "I need to know what starts this workflow. For example: Gmail, Google Sheets, Stripe, a webhook, or a schedule.",
         "Which Gmail label or folder should I monitor?",
         "Should every invoice trigger the workflow, or only invoices above a certain amount?",
         "Where should the notification be sent?",
@@ -413,6 +413,106 @@
       "rejected_by_guard": 0,
       "replies": [
         "Should duplicates be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c26_sheets_to_teams",
+      "category": "more-apps",
+      "outcome": "exact",
+      "turns": 5,
+      "completed_at_turn": 5,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which Google Sheets spreadsheet should I watch for new rows?",
+        "Should every row trigger the workflow, or only rows above a certain amount?",
+        "Which Microsoft Teams team and channel?",
+        "Should duplicate rows be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c27_stripe_failed_payment_to_sms",
+      "category": "more-apps",
+      "outcome": "exact",
+      "turns": 3,
+      "completed_at_turn": 3,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Should every payment trigger the workflow, or only payments above a certain amount?",
+        "Should duplicate payments be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c28_form_and_spreadsheet_are_both_ambiguous",
+      "category": "ambiguous",
+      "outcome": "exact",
+      "turns": 7,
+      "completed_at_turn": 7,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "When you say \"form\", do you mean Google Forms or Typeform?",
+        "Which Typeform form should I watch for new responses?",
+        "Should every response trigger the workflow, or only responses above a certain amount?",
+        "Where should the notification be sent?",
+        "Which Excel workbook should I add the row to?",
+        "Should duplicate responses be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c29_github_issue_to_jira_bug",
+      "category": "more-apps",
+      "outcome": "exact",
+      "turns": 4,
+      "completed_at_turn": 4,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which GitHub repository should I watch?",
+        "Which Jira project should the issue go in?",
+        "Should duplicate issues be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c30_shopify_orders_to_sheets",
+      "category": "more-apps",
+      "outcome": "exact",
+      "turns": 4,
+      "completed_at_turn": 4,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which Shopify event should start the workflow?",
+        "Which Google Sheets spreadsheet should I add the row to?",
+        "Should duplicate orders be ignored?",
+        "I have all the required information. Generating your workflow."
+      ]
+    },
+    {
+      "id": "c31_telegram_to_notion",
+      "category": "more-apps",
+      "outcome": "exact",
+      "turns": 5,
+      "completed_at_turn": 5,
+      "assumed": [],
+      "mismatched": [],
+      "rejected_by_guard": 0,
+      "replies": [
+        "Which Telegram chat or bot should I listen to?",
+        "Should every message trigger the workflow, or only messages above a certain amount?",
+        "Which Notion database should the new page go in?",
+        "Should duplicate messages be ignored?",
         "I have all the required information. Generating your workflow."
       ]
     }

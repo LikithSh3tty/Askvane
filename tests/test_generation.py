@@ -192,7 +192,8 @@ def test_phraser_passes_rephrase_flag_and_options():
     phrase(llm, req, state, CATALOG)
     sent = llm.payloads[0]
     assert sent["requirement"] == "trigger" and sent["rephrase"] is True
-    assert sent["options"] == ["Gmail", "Outlook", "Webhook", "Schedule"]
+    assert sent["options"][:4] == ["Gmail", "Outlook", "Webhook", "Schedule"]
+    assert "Google Sheets" in sent["options"]
 
 
 def test_stub_rephrase_is_worded_differently():

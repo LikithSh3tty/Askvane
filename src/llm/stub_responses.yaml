@@ -19,6 +19,10 @@ subjects:
   ticket: tickets
   lead: leads
   submission: submissions
+  row: rows
+  response: responses
+  issue: issues
+  payment: payments
 
 ambiguity_template: 'When you say "{span}", do you mean {options}?'
 
@@ -236,30 +240,30 @@ extraction:
     extractions:
       - { requirement: filter.operator, value: gt, span: above }
       - { requirement: filter.value, value: "50000", span: "₹50,000" }
-  "When a new invoice arrives in Gmail, post it to Discord":
+  "When a new invoice arrives in Gmail, post it to Mattermost":
     extractions:
       - { requirement: trigger, value: gmail_trigger, span: Gmail }
     unsupported:
-      - { requirement: action, span: Discord }
-  "Send new Typeform responses to Slack":
+      - { requirement: action, span: Mattermost }
+  "Send new Jotform responses to Slack":
     extractions:
       - { requirement: action, value: slack_notify, span: Slack }
     unsupported:
-      - { requirement: trigger, span: Typeform }
-  "Use a webhook then, at /typeform":
+      - { requirement: trigger, span: Jotform }
+  "Use a webhook then, at /jotform":
     extractions:
       - { requirement: trigger, value: webhook_trigger, span: webhook }
-      - { requirement: trigger.path, value: /typeform, span: /typeform }
+      - { requirement: trigger.path, value: /jotform, span: /jotform }
   "#leads":
     extractions:
       - { requirement: action.channel, value: "#leads", span: "#leads" }
-  "When someone tweets about us, text me on WhatsApp":
+  "When someone tweets about us, text me on Signal":
     extractions:
       # Hallucination: "text me" does not name email.
       - { requirement: action, value: email_send, span: text me }
     unsupported:
       - { requirement: trigger, span: tweets }
-      - { requirement: action, span: WhatsApp }
+      - { requirement: action, span: Signal }
   "Notify the finance team about new invoices":
     extractions:
       # Every one of these is a guess. None may reach the state.
@@ -313,11 +317,86 @@ extraction:
       - { requirement: action, value: slack_notify, span: Slack }
       - { requirement: action.channel, value: "#support", span: "#support" }
 
+  # ------------------------------------------------ apps beyond the reference
+  "When a new row is added to Google Sheets, post it to Microsoft Teams":
+    extractions:
+      - { requirement: trigger, value: google_sheets_trigger, span: Google Sheets }
+      - { requirement: action, value: teams_notify, span: Microsoft Teams }
+  "Leads 2026":
+    extractions:
+      - { requirement: trigger.spreadsheet, value: Leads 2026, span: Leads 2026 }
+  "every row":
+    extractions:
+      - { requirement: filter.mode, value: all, span: every }
+  "Sales team, General channel":
+    extractions:
+      - { requirement: action.team, value: Sales, span: Sales team }
+      - { requirement: action.channel, value: General, span: General channel }
+  "When a Stripe payment fails, send an SMS to +919876543210":
+    extractions:
+      - { requirement: trigger, value: stripe_trigger, span: Stripe }
+      - { requirement: trigger.event, value: payment_failed, span: payment fails }
+      - { requirement: action, value: sms_send, span: SMS }
+      - { requirement: action.phone_number, value: "+919876543210", span: "+919876543210" }
+  "Add new form responses to a spreadsheet":
+    extractions:
+      # "form" fits Google Forms and Typeform, "spreadsheet" fits Google Sheets and Excel.
+      - { requirement: trigger, value: google_forms_trigger, span: form }
+      - { requirement: action, value: google_sheets_append, span: spreadsheet }
+  "Typeform":
+    extractions:
+      - { requirement: trigger, value: typeform_trigger, span: Typeform }
+  "Customer survey":
+    extractions:
+      - { requirement: trigger.form, value: Customer survey, span: Customer survey }
+  "Excel":
+    extractions:
+      - { requirement: action, value: excel_append, span: Excel }
+  "Survey results":
+    extractions:
+      - { requirement: action.workbook, value: Survey results, span: Survey results }
+  "Open a Jira bug for every new GitHub issue":
+    extractions:
+      - { requirement: trigger, value: github_trigger, span: GitHub }
+      - { requirement: trigger.event, value: issue, span: GitHub issue }
+      - { requirement: filter.mode, value: all, span: every }
+      - { requirement: action, value: jira_create_issue, span: Jira }
+      - { requirement: action.issue_type, value: bug, span: Jira bug }
+  "acme/webapp":
+    extractions:
+      - { requirement: trigger.repository, value: acme/webapp, span: acme/webapp }
+  "WEB":
+    extractions:
+      - { requirement: action.project, value: WEB, span: WEB }
+  "Log every new Shopify order in Google Sheets":
+    extractions:
+      # The event is not named as one of its options ("new Shopify order" is not
+      # "new order"), so the stub leaves it for a question.
+      - { requirement: trigger, value: shopify_trigger, span: Shopify }
+      - { requirement: filter.mode, value: all, span: every }
+      - { requirement: action, value: google_sheets_append, span: Google Sheets }
+  "New orders":
+    extractions:
+      - { requirement: trigger.event, value: order_created, span: New orders }
+  "Orders 2026":
+    extractions:
+      - { requirement: action.spreadsheet, value: Orders 2026, span: Orders 2026 }
+  "When someone messages my Telegram bot, save it to Notion":
+    extractions:
+      - { requirement: trigger, value: telegram_trigger, span: Telegram }
+      - { requirement: action, value: notion_create_page, span: Notion }
+  "@acme_support_bot":
+    extractions:
+      - { requirement: trigger.chat, value: "@acme_support_bot", span: "@acme_support_bot" }
+  "Support inbox":
+    extractions:
+      - { requirement: action.database, value: Support inbox, span: Support inbox }
+
 question:
   trigger:
     ask: Which platform receives the {item}?
     ask_generic: What should start this workflow?
-    rephrase: "I need to know what starts this workflow. Please pick one: Gmail, Outlook, a webhook, or a schedule."
+    rephrase: "I need to know what starts this workflow. For example: Gmail, Google Sheets, Stripe, a webhook, or a schedule."
   trigger.monitor_location:gmail_trigger:
     ask: Which Gmail label or folder should I monitor?
     rephrase: "Which Gmail label should I watch? For example: Finance, Inbox, or Invoices."
@@ -351,7 +430,7 @@ question:
     rephrase: "Please give me the exact value, for example 10,000."
   action:
     ask: Where should the notification be sent?
-    rephrase: "Please pick where the result goes: Slack, email, or an HTTP request."
+    rephrase: "Please pick where the result goes, for example: Slack, email, Microsoft Teams, Google Sheets, or Jira."
   action.channel:
     ask: Which Slack workspace and channel?
     rephrase: "Which Slack channel should I post in? For example: #finance."
@@ -368,3 +447,88 @@ question:
     ask: Should duplicate {items} be ignored?
     ask_generic: Should duplicates be ignored?
     rephrase: "If the same item arrives twice, should I skip the second one? Yes or no."
+  # ---------------------------------------------- apps beyond the reference
+  trigger.spreadsheet:
+    ask: Which Google Sheets spreadsheet should I watch for new rows?
+    rephrase: "Please give me the spreadsheet's name, for example: Leads 2026."
+  trigger.workbook:
+    ask: Which Excel workbook should I watch for new rows?
+    rephrase: "Please give me the workbook's name, for example: Sales Tracker."
+  trigger.form:google_forms_trigger:
+    ask: Which Google Form should I watch for new responses?
+    rephrase: "Please give me the form's title, for example: Customer survey."
+  trigger.form:typeform_trigger:
+    ask: Which Typeform form should I watch for new responses?
+    rephrase: "Please give me the form's title, for example: Customer survey."
+  trigger.chat:
+    ask: Which Telegram chat or bot should I listen to?
+    rephrase: "Please give me the bot's username or the chat name, for example: @acme_support_bot."
+  trigger.folder:
+    ask: Which Google Drive folder should I watch for new files?
+    rephrase: "Please give me the folder's name, for example: Invoices."
+  trigger.calendar:
+    ask: Which Google Calendar should I watch for new events?
+    rephrase: "Please name the calendar, for example: Team meetings."
+  trigger.event:stripe_trigger:
+    ask: Which Stripe event should start the workflow?
+    rephrase: "Please pick one: payment succeeded, payment failed, invoice paid, subscription created, or subscription cancelled."
+  trigger.event:shopify_trigger:
+    ask: Which Shopify event should start the workflow?
+    rephrase: "Please pick one: a new order, a paid order, a new customer, or a product update."
+  trigger.event:github_trigger:
+    ask: Which GitHub event should start the workflow?
+    rephrase: "Please pick one: a push, a pull request, an issue, or a release."
+  trigger.repository:
+    ask: Which GitHub repository should I watch?
+    rephrase: "Please give me the repository as owner/name, for example: acme/webapp."
+  trigger.feed_url:
+    ask: Which RSS feed should I watch?
+    rephrase: "Please give me the feed's full URL, starting with https://."
+  action.team:
+    ask: Which Microsoft Teams team and channel?
+    rephrase: "Which team should I post in? For example: Sales."
+  action.channel:teams_notify:
+    ask: Which Teams channel should I post in?
+    rephrase: "Please name the channel, for example: General."
+  action.channel:discord_notify:
+    ask: Which Discord channel should I post in?
+    rephrase: "Please name the channel, for example: #alerts."
+  action.chat:
+    ask: Which Telegram chat, group or channel should get the message?
+    rephrase: "Please give me the chat's name or username, for example: @finance_team."
+  action.phone_number:whatsapp_send:
+    ask: Which WhatsApp number should receive the message?
+    rephrase: "Please give me the full number with its country code, for example: +919876543210."
+  action.phone_number:sms_send:
+    ask: Which phone number should receive the text message?
+    rephrase: "Please give me the full number with its country code, for example: +919876543210."
+  action.spreadsheet:
+    ask: Which Google Sheets spreadsheet should I add the row to?
+    rephrase: "Please give me the spreadsheet's name, for example: Orders 2026."
+  action.workbook:
+    ask: Which Excel workbook should I add the row to?
+    rephrase: "Please give me the workbook's name, for example: Survey results."
+  action.database:
+    ask: Which Notion database should the new page go in?
+    rephrase: "Please name the database, for example: Support inbox."
+  action.board:
+    ask: Which Trello board should the card go on?
+    rephrase: "Please name the board, for example: Sales pipeline."
+  action.list:
+    ask: Which list on that board should the card go in?
+    rephrase: "Please name the list, for example: To do."
+  action.project:jira_create_issue:
+    ask: Which Jira project should the issue go in?
+    rephrase: "Please give me the project key or name, for example: WEB."
+  action.project:asana_create_task:
+    ask: Which Asana project should the task go in?
+    rephrase: "Please name the project, for example: Marketing."
+  action.issue_type:
+    ask: What kind of Jira issue should I create?
+    rephrase: "Please pick one: task, bug, or story."
+  action.base:
+    ask: Which Airtable base should the record go in?
+    rephrase: "Please name the base, for example: CRM."
+  action.table:
+    ask: Which table in that base?
+    rephrase: "Please name the table, for example: Contacts."

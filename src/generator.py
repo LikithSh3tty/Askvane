@@ -85,8 +85,10 @@ def generate(state: WorkflowState, catalog: Catalog | None = None) -> dict:
 
 # -- the collected-information table ---------------------------------------
 
-def _format_value(filled) -> str:
+def _format_value(filled, spec=None) -> str:
     value = filled.value
+    if spec is not None and spec.enum and isinstance(value, str):
+        return value.replace("_", " ")   # payment_failed -> payment failed
     if isinstance(value, bool):
         return "Yes" if value else "No"
     if isinstance(value, (int, float)):
@@ -104,7 +106,7 @@ def _params_text(state: WorkflowState, slot_id: str, catalog: Catalog, required_
     parts = []
     for name, spec in catalog.nodes[node_type].params.items():
         if name in slot.params and (param_required(spec, slot) or not required_only):
-            text = _format_value(slot.params[name])
+            text = _format_value(slot.params[name], spec)
             parts.append(f"{text} {spec.display_suffix}" if spec.display_suffix else text)
     return ", ".join(parts) or NONE
 
@@ -132,7 +134,7 @@ def _preferences_text(state: WorkflowState, catalog: Catalog) -> str:
         slot = state.slots[slot_spec.id]
         for name, spec in catalog.nodes[node_type].params.items():
             if name in slot.params and not param_required(spec, slot):
-                prefs.append(f"{name.replace('_', ' ')}: {_format_value(slot.params[name])}")
+                prefs.append(f"{name.replace('_', ' ')}: {_format_value(slot.params[name], spec)}")
     return "; ".join(prefs) or NONE
 
 
