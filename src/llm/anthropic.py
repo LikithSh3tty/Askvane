@@ -26,17 +26,23 @@ class AnthropicLLM(LLM):
 
     def complete_json(self, system: str, user: str, schema: dict) -> dict:
         body = {k: v for k, v in schema.items() if k != "title"}
-        response = self.client.beta.messages.create(
-            model=self.model,
-            max_tokens=4096,
-            system=system,
-            messages=[{"role": "user", "content": user}],
-            # Reading slots out of one sentence is a small task; low effort keeps turns fast.
-            output_config={"effort": "low", "format": {"type": "json_schema", "schema": body}},
-            # If a safety classifier declines, let the API retry on its default fallback.
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",
-        )
+        try:
+            response = self.client.beta.messages.create(
+                model=self.model,
+                max_tokens=4096,
+                system=system,
+                messages=[{"role": "user", "content": user}],
+                # Reading slots out of one sentence is a small task; low effort keeps turns fast.
+                output_config={"effort": "low", "format": {"type": "json_schema", "schema": body}},
+                # If a safety classifier declines, let the API retry on its default fallback.
+                betas=["server-side-fallback-2026-07-01"],
+                fallbacks="default",
+            )
+        except anthropic.APIStatusError as exc:
+            # A bad key or model name is a provider failure, not a crash: say which one.
+            raise LLMError(f"{exc.status_code} {type(exc).__name__}: {exc.message}") from exc
+        except anthropic.APIConnectionError as exc:
+            raise LLMError(f"could not reach the Anthropic API: {exc}") from exc
         if response.stop_reason == "refusal":
             raise LLMError("model declined the request")
         text = next((b.text for b in response.content if b.type == "text"), None)

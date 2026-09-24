@@ -144,6 +144,27 @@ def test_anthropic_provider_raises_on_refusal(monkeypatch):
         llm.complete_json("s", "u", {"type": "object"})
 
 
+def test_anthropic_api_errors_become_llm_errors(monkeypatch):
+    import anthropic
+    import httpx2
+    llm, messages = fake_provider(monkeypatch, "{}")
+    req = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
+
+    def reject(**kwargs):
+        raise anthropic.AuthenticationError("invalid x-api-key", response=httpx2.Response(401, request=req), body=None)
+
+    messages.create = reject
+    with pytest.raises(LLMError, match="401 AuthenticationError: invalid x-api-key"):
+        llm.complete_json("s", "u", {"type": "object"})
+
+    def unreachable(**kwargs):
+        raise anthropic.APIConnectionError(request=req)
+
+    messages.create = unreachable
+    with pytest.raises(LLMError, match="could not reach"):
+        llm.complete_json("s", "u", {"type": "object"})
+
+
 def test_anthropic_provider_raises_on_non_json(monkeypatch):
     llm, _ = fake_provider(monkeypatch, "Sure! here you go")
     with pytest.raises(LLMError):
