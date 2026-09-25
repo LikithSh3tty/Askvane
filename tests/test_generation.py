@@ -211,6 +211,18 @@ def test_word_inside_a_longer_name_belongs_to_that_name():
     assert amb == [] and clear[0].value == "google_forms_trigger"
 
 
+@pytest.mark.parametrize("span, expected", [
+    ("a Gmail email", ["gmail_trigger"]),        # "Gmail" is its own word; "email" is shared
+    ("Outlook mail", ["outlook_trigger"]),
+    ("an email", ["gmail_trigger", "outlook_trigger"]),   # nothing specific: still ambiguous
+    ("Gmail or Outlook", ["gmail_trigger", "outlook_trigger"]),
+])
+def test_a_specific_word_outranks_a_shared_one(span, expected):
+    clear, amb = find([Grounded("trigger", expected[0], span)], offered(new_state()), CATALOG, None)
+    named = [clear[0].value] if clear else sorted(amb[0].options)
+    assert named == expected
+
+
 def test_one_span_filling_two_text_slots_is_ambiguous():
     state = fill(new_state(), trigger="gmail_trigger", action="slack_notify")
     both = [Grounded("trigger.monitor_location", "Finance", "Finance"),

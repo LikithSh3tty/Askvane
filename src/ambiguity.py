@@ -3,9 +3,9 @@
 Detection means ask, never pick. Every ambiguity in a message is returned, not
 just the first: the agent asks about one and parks the rest. Two cases:
   - options: the span names more than one option of the same requirement
-    ("email" could be the Gmail trigger or the Outlook trigger). A word inside a
-    longer name the user said belongs to that name: "Google Forms" names Google
-    Forms, not also Typeform through "forms";
+    ("email" could be the Gmail trigger or the Outlook trigger). Specific words
+    win over generic ones: "Google Forms" names Google Forms, not also Typeform
+    through "forms", and "a Gmail email" names Gmail, not also Outlook;
   - slots: one piece of free text was read as the answer to two different
     requirements, and neither is the question the user was just asked.
 """
@@ -31,7 +31,14 @@ class Ambiguity:
 
 
 def named_options(span: str, aliases: dict) -> list:
-    """Options the span names, dropping any named only by a word inside another option's longer name."""
+    """Options the span names, once generic words have given way to specific ones.
+
+    Two steps. A word inside a longer name the user said belongs to that name
+    ("Google Forms" is not also Typeform's "forms"). Then, if some option is named
+    by a word of its own, options named only by words they share with it drop out:
+    "a Gmail email" is Gmail, because "email" is shared with Outlook but "Gmail" is
+    not. A bare "an email" names no option by a word of its own, so it stays ambiguous.
+    """
     hits = {o: [a for a in names if mentions(span, a)] for o, names in aliases.items()}
     hits = {o: found for o, found in hits.items() if found}
 
@@ -39,7 +46,14 @@ def named_options(span: str, aliases: dict) -> list:
         return any(squash(alias) != squash(longer) and mentions(longer, alias)
                    for other, found in hits.items() if other != option for longer in found)
 
-    return [o for o, found in hits.items() if not all(inside_another(o, a) for a in found)]
+    named = {o: found for o, found in hits.items() if not all(inside_another(o, a) for a in found)}
+
+    def own_word(option) -> bool:
+        others = {squash(a) for other, found in named.items() if other != option for a in found}
+        return any(squash(a) not in others for a in named[option])
+
+    specific = [o for o in named if own_word(o)]
+    return specific if specific else list(named)
 
 
 def _overlap(a: str, b: str) -> bool:
