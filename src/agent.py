@@ -165,7 +165,8 @@ def handle_turn(state: WorkflowState, utterance: str, llm: LLM, catalog: Catalog
         if still_open:
             req = replace(still_open[0], rephrase=state.asked.get(still_open[0].id, 0) >= REPHRASE_AFTER)
         # A narrowing parked from an earlier message is asked before the open question.
-        reply = "".join(declines) + phrase(llm, req, state, catalog, ambiguity=_narrowed(req, state, catalog))
+        said = "".join(declines)
+        reply = said + phrase(llm, req, state, catalog, ambiguity=_narrowed(req, state, catalog), said_first=said)
         state.mark_asked(req.id)
 
     state.transcript.append(Turn(role="agent", text=reply))

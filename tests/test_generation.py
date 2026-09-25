@@ -303,3 +303,27 @@ def test_phrased_question_is_cleaned_before_it_is_asked():
     llm = Recorder({"question": "Which Stripe event \ndash payment or invoice?"})
     req = next_question(new_state(), CATALOG)
     assert phrase(llm, req, new_state(), CATALOG) == "Which Stripe event \u2014 payment or invoice?"
+
+
+class RecordingStub(StubLLM):
+    def __init__(self):
+        super().__init__()
+        self.payloads = []
+
+    def complete_json(self, system, user, schema):
+        if schema.get("title") == "question":
+            self.payloads.append(json.loads(user))
+        return super().complete_json(system, user, schema)
+
+
+def test_the_question_after_a_decline_knows_the_decline_was_said():
+    llm = RecordingStub()
+    reply = handle_turn(new_state(), "When a new invoice arrives in Gmail, post it to Mattermost", llm, CATALOG).reply
+    said = llm.payloads[-1]["said_first"]
+    assert said.startswith("I can't build a workflow with Mattermost") and reply.startswith(said)
+
+
+def test_an_ordinary_question_has_nothing_said_first():
+    llm = RecordingStub()
+    handle_turn(new_state(), REFERENCE[0][0], llm, CATALOG)
+    assert llm.payloads[-1]["said_first"] is None

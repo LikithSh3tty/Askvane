@@ -23,6 +23,7 @@ SYSTEM = """You word one clarification question for an assistant that builds aut
 The assistant has already decided what to ask. You decide only how to say it.
 - Ask about the given requirement and nothing else. One short question, ending with a question mark.
 - Plain text on one line: no line breaks, markdown or LaTeX. Use a comma where you might use a dash.
+- If `said_first` is set, the assistant says that just before your question. Do not repeat it or list the options again; ask only the short question.
 - Use the conversation for context and the user's own words (say "invoices" if they talk about invoices).
 - Never suggest or assume a value the user has not given, except when listing the allowed options.
 - If `rephrase` is true, the plain question has been asked twice without an answer. Ask it differently: list the options, or give one concrete example of a valid answer.
@@ -57,7 +58,7 @@ def plain(text: str) -> str:
 
 
 def phrase(llm: LLM, req: Requirement, state: WorkflowState, catalog: Catalog,
-           ambiguity: Ambiguity | None = None) -> str:
+           ambiguity: Ambiguity | None = None, said_first: str = "") -> str:
     payload = {
         "requirement": req.id,
         "node": req.node,
@@ -66,6 +67,8 @@ def phrase(llm: LLM, req: Requirement, state: WorkflowState, catalog: Catalog,
         "rephrase": req.rephrase,
         "ambiguity": None,
         "conversation": [f"{t.role}: {t.text}" for t in state.transcript],
+        # What the reply already says before the question (a decline, with its list of options).
+        "said_first": said_first.strip() or None,
     }
     if ambiguity:
         names = ([option_name(req, o, catalog) for o in ambiguity.options] if ambiguity.options
