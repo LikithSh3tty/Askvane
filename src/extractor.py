@@ -61,7 +61,7 @@ Rules:
 - Only use requirement ids from the list. Never invent one.
 - Only extract what the message states explicitly. Never infer, guess, or fill in a sensible default. "Notify my finance team" names no platform and no channel.
 - If a word could mean more than one option (for example "email" could be Gmail or Outlook), still return the option you think is meant; the caller checks ambiguity itself.
-- If the user names something for a requirement that none of its options covers (a platform or service that is not listed), add it to `unsupported` with the requirement id and the span.
+- If the user names something for a requirement that none of its options covers (a platform or service that is not listed), add it to `unsupported` with the requirement id and, as the span, just its name as the user wrote it ("Mattermost", not "post it to Mattermost").
 - If the message answers nothing on the list, return empty arrays.
 """
 

@@ -287,7 +287,7 @@
       "mismatched": [],
       "rejected_by_guard": 0,
       "replies": [
-        "I can't build a workflow with Mattermost: it isn't one of the supported options (Slack, Email, HTTP Request, Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable or Asana). Where should the notification be sent?"
+        "I can't build that: \"Mattermost\" isn't one of the supported options (Slack, Email, HTTP Request, Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable or Asana). Where should the notification be sent?"
       ]
     },
     {
@@ -300,7 +300,7 @@
       "mismatched": [],
       "rejected_by_guard": 0,
       "replies": [
-        "I can't build a workflow with Jotform: it isn't one of the supported options (Gmail, Outlook, Webhook, Schedule, Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub or RSS Feed). Which platform receives the response?",
+        "I can't build that: \"Jotform\" isn't one of the supported options (Gmail, Outlook, Webhook, Schedule, Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub or RSS Feed). Which platform receives the response?",
         "Should every response trigger the workflow, or only responses above a certain amount?",
         "Which Slack workspace and channel?",
         "Should duplicate responses be ignored?",
@@ -317,7 +317,7 @@
       "mismatched": [],
       "rejected_by_guard": 1,
       "replies": [
-        "I can't build a workflow with tweets: it isn't one of the supported options (Gmail, Outlook, Webhook, Schedule, Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub or RSS Feed). I can't build a workflow with Signal: it isn't one of the supported options (Slack, Email, HTTP Request, Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable or Asana). What should start this workflow?"
+        "I can't build that: \"tweets\" isn't one of the supported options (Gmail, Outlook, Webhook, Schedule, Google Sheets, Excel, Google Forms, Typeform, Telegram, Google Drive, Google Calendar, Stripe, Shopify, GitHub or RSS Feed). I can't build that: \"Signal\" isn't one of the supported options (Slack, Email, HTTP Request, Microsoft Teams, Discord, Telegram, WhatsApp, SMS, Google Sheets, Excel, Notion, Trello, Jira, Airtable or Asana). What should start this workflow?"
       ]
     },
     {

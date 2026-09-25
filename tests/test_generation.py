@@ -320,7 +320,7 @@ def test_the_question_after_a_decline_knows_the_decline_was_said():
     llm = RecordingStub()
     reply = handle_turn(new_state(), "When a new invoice arrives in Gmail, post it to Mattermost", llm, CATALOG).reply
     said = llm.payloads[-1]["said_first"]
-    assert said.startswith("I can't build a workflow with Mattermost") and reply.startswith(said)
+    assert said.startswith('I can\'t build that: "Mattermost" isn\'t one of the supported options') and reply.startswith(said)
 
 
 def test_an_ordinary_question_has_nothing_said_first():

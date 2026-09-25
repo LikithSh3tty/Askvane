@@ -69,7 +69,9 @@ def _decline(item: Extraction, offered: list[Requirement], catalog: Catalog) -> 
     req = next(r for r in offered if r.id == item.requirement)
     names = [option_name(req, o, catalog) for o in req.options]
     listed = ", ".join(names[:-1]) + " or " + names[-1]
-    return f"I can't build a workflow with {item.span}: it isn't one of the supported options ({listed}). "
+    # The user's words are quoted, so the sentence reads right whether the model marked
+    # just the name ("Mattermost") or the whole phrase ("post it to Mattermost").
+    return f"I can't build that: \"{item.span}\" isn't one of the supported options ({listed}). "
 
 
 def _park(found: list[ambiguity.Ambiguity], state: WorkflowState, turn: int, catalog: Catalog) -> None:
